@@ -14,7 +14,7 @@ func main() {
 
 	mux.HandleFunc("/", handleDashboard)
 	mux.HandleFunc("/database/cola", handleDatabaseDetails)
-	mux.HandleFunc("/database/new", handleDatabaseDetails)
+	mux.HandleFunc("/database/new", handleDatabaseNew)
 	mux.HandleFunc("/server/db-01", handleServerDetails)
 
 	err := http.ListenAndServe(":3030", mux)
@@ -38,6 +38,21 @@ func handleDatabaseDetails(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "database-details", Database{
 		Name:   "cola",
 		Server: "db-01",
+	})
+}
+
+func handleDatabaseNew(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		database := Database{
+			Name:   r.PostFormValue("name"),
+			Server: r.PostFormValue("server"),
+		}
+
+	}
+
+	renderTemplate(w, "database-new", Database{
+		Name:   "",
+		Server: "",
 	})
 }
 
