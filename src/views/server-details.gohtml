@@ -1,21 +1,21 @@
 {{define "head"}}
-    <title>db-01 - server details - Soda</title>
+    <title>{{ .Name }} - server details - Soda</title>
 {{end}}
 
 
 {{define "body"}}
 
-<h1>db-01</h1>
+<h1>{{ .Name }}</h1>
 
 <div>
     <h2>Server details</h2>
     <dl>
         <dt>Name</dt>
-        <dd>db-01</dd>
+        <dd>{{ .Name }}</dd>
         <dt>Databases</dt>
-        <dd>2</dd>
+        <dd>{{ .Databases }}</dd>
         <dt>IP address</dt>
-        <dd>10.0.0.36</dd>
+        <dd>{{ .IpAddress }}</dd>
     </dl>
 </div>
 

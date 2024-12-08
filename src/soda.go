@@ -10,7 +10,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	fs := http.FileServer(http.Dir("static/"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	mux.HandleFunc("/", handleDashboard)
 	mux.HandleFunc("/database/cola", handleDatabaseDetails)
@@ -24,27 +24,47 @@ func main() {
 }
 
 func handleDashboard(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "dashboard")
+	renderTemplate(w, "dashboard", nil)
 }
 
 func handleDatabaseDetails(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 	}
-	renderTemplate(w, "database-details")
+	renderTemplate(w, "database-details", Database{
+		Name:   "cola",
+		Server: "db-01",
+	})
 }
 
 func handleServerDetails(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 	}
-	renderTemplate(w, "server-details")
+	renderTemplate(w, "server-details", Server{
+		Name:      "db-01",
+		IpAddress: "10.0.0.36",
+		Status:    "OK",
+		Databases: 2,
+	})
 }
 
-func renderTemplate(w http.ResponseWriter, name string) {
+func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
 	tmpls := template.Must(template.ParseFiles("views/soda.gohtml", "views/"+name+".gohtml"))
-	err := tmpls.ExecuteTemplate(w, "soda.gohtml", nil)
+	err := tmpls.ExecuteTemplate(w, "soda.gohtml", data)
 
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Error rendering template", http.StatusInternalServerError)
 	}
+}
+
+type Server struct {
+	Name      string
+	Databases int
+	IpAddress string
+	Status    string
+}
+
+type Database struct {
+	Name   string
+	Server string
 }
