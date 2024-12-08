@@ -24,7 +24,12 @@ func main() {
 }
 
 func handleDashboard(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "dashboard", nil)
+	renderTemplate(w, "dashboard", Dashboard{
+		Databases: []Database{
+			{Name: "cola", Server: "db-01"},
+			{Name: "lemonade", Server: "db-02"},
+		},
+	})
 }
 
 func handleDatabaseDetails(w http.ResponseWriter, r *http.Request) {
@@ -55,6 +60,10 @@ func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
 		log.Println(err)
 		http.Error(w, "Error rendering template", http.StatusInternalServerError)
 	}
+}
+
+type Dashboard struct {
+	Databases []Database
 }
 
 type Server struct {
