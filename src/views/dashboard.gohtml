@@ -18,13 +18,14 @@
         </tr>
         {{ range .Databases }}
             <tr>
-                <th><a href="/database/cola">{{ .Name }}</a></th>
-                <th><a href="/server/db-01">{{ .Server }}</a></th>
+                <th><a href="/databases/{{ .Name }}">{{ .Name }}</a></th>
+                <th><a href="/servers/{{ .Server }}">{{ .Server }}</a></th>
                 <th>OK</th>
             </tr>
         {{ end }}
     </table>
     <a href="/database/new">New database</a>
+    <a href="/server/new">New server</a>
 </div>
 
 {{end}}

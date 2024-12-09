@@ -1,0 +1,23 @@
+{{define "head"}}
+    <title>New server - Soda</title>
+{{end}}
+
+
+{{define "body"}}
+
+<h1>New database</h1>
+
+<div>
+    <h2>Database deets</h2>
+    <form action="/server/new" method="post">
+        <dl>
+            <dt>Name</dt>
+            <dd><input name="name" value="{{ .Name }}" /></dd>
+            <dt>IP Address</dt>
+            <dd><input name="ipAddress" value="{{ .IpAddress }}" /></dd>
+        </dl>
+        <button type="submit">Add</button>
+    </form>
+</div>
+
+{{end}}
