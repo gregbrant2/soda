@@ -2,21 +2,26 @@
     <title>New server - Soda</title>
 {{end}}
 
+{{define "subheader"}}
+<h2>New<span> / server</span></h2>
+{{end}}
 
 {{define "body"}}
 
-<h1>New database</h1>
-
 <div>
-    <h2>Database deets</h2>
-    <form action="/server/new" method="post">
-        <dl>
-            <dt>Name</dt>
-            <dd><input name="name" value="{{ .Name }}" /></dd>
-            <dt>IP Address</dt>
-            <dd><input name="ipAddress" value="{{ .IpAddress }}" /></dd>
-        </dl>
-        <button type="submit">Add</button>
+    <p>Something about adding your new server.</p>
+    <form action="/server/new" method="post" class="layout--flow">
+        <div class="form-field">
+            <label for="name">Name</label>
+            <input name="name" value="{{ .Name }}" required placeholder="Server name" />
+        </div>
+        <div class="form-field">
+            <label for="server">IP Address</label>
+            <input name="server" value="{{ .IpAddress }}" required placeholder="10.0.0.36" />
+        </div>
+        <div>
+            <button type="submit">Add</button>
+        </div>
     </form>
 </div>
 

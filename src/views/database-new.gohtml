@@ -2,21 +2,27 @@
     <title>New database - Soda</title>
 {{end}}
 
+{{define "subheader"}}
+<h2>New<span> / database</span></h2>
+{{end}}
+
 
 {{define "body"}}
 
-<h1>New database</h1>
-
 <div>
-    <h2>Database deets</h2>
-    <form action="/database/new" method="post">
-        <dl>
-            <dt>Name</dt>
-            <dd><input name="name" value="{{ .Name }}" /></dd>
-            <dt>Server</dt>
-            <dd><input name="server" value="{{ .Server }}" /></dd>
-        </dl>
-        <button type="submit">Add</button>
+    <p>Something about creating your new database.</p>
+    <form action="/database/new" method="post" class="layout--flow">
+        <div class="form-field">
+            <label for="name">Name</label>
+            <input name="name" value="{{ .Name }}" required placeholder="Database name" />
+        </div>
+        <div class="form-field">
+            <label for="server">Server</label>
+            <input name="server" value="{{ .Server }}" required placeholder="Server name" />
+        </div>
+        <div>
+            <button type="submit">Add</button>
+        </div>
     </form>
 </div>
 

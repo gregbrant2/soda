@@ -2,30 +2,40 @@
     <title>Dashboard - Soda</title>
 {{end}}
 
+{{define "subheader"}}
+<h2>Databases</h2>
+{{end}}
 
 {{define "body"}}
+<article class="layout--flow">
+    <div class="layout--flow">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Server</th>
+                    <th>Status?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .Databases }}
+                    <tr>
+                        <th><a href="/databases/{{ .Name }}">{{ .Name }}</a></th>
+                        <th><a href="/servers/{{ .Server }}">{{ .Server }}</a></th>
+                        <th>OK</th>
+                    </tr>
+                {{ end }}
+                </tbody>
+                <tfoot>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 
-<h1>Soda</h1>
-
-<div>
-    <h2>Databases</h2>
-
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Server</th>
-            <th>Status?</th>
-        </tr>
-        {{ range .Databases }}
-            <tr>
-                <th><a href="/databases/{{ .Name }}">{{ .Name }}</a></th>
-                <th><a href="/servers/{{ .Server }}">{{ .Server }}</a></th>
-                <th>OK</th>
-            </tr>
-        {{ end }}
-    </table>
-    <a href="/database/new">New database</a>
-    <a href="/server/new">New server</a>
-</div>
-
+    <footer>
+        <a href="/database/new" class="button">New database</a>
+        <a href="/server/new" class="button">New server</a>
+    </footer>
+</article>
 {{end}}

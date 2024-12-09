@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -37,16 +38,20 @@ func main() {
 	fs := http.FileServer(http.Dir("static/"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	mux.HandleFunc("/", handleDashboard)
-	mux.HandleFunc("/database/new", handleDatabaseNew)
-	mux.HandleFunc("/databases/{name}", handleDatabaseDetails)
-	mux.HandleFunc("/server/new", handleServerNew)
-	mux.HandleFunc("/servers/{name}", handleServerDetails)
+	bindRoute(mux, "/", handleDashboard)
+	bindRoute(mux, "/database/new", handleDatabaseNew)
+	bindRoute(mux, "/databases/{name}", handleDatabaseDetails)
+	bindRoute(mux, "/server/new", handleServerNew)
+	bindRoute(mux, "/servers/{name}", handleServerDetails)
 
 	err = http.ListenAndServe(":3030", mux)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func bindRoute(mux *http.ServeMux, path string, handler http.HandlerFunc) {
+	mux.HandleFunc(path, Chain(handler, Logging()))
 }
 
 func handleDashboard(w http.ResponseWriter, r *http.Request) {
@@ -59,8 +64,12 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 		Databases: dbs,
 	})
 }
+
 func handleDatabaseDetails(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+
+	log.Println(name, "details")
+
 	db, err := getDatabaseByName(name)
 	if err != nil {
 		log.Fatal(err)
@@ -95,6 +104,9 @@ func handleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 
 func handleServerDetails(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+
+	log.Println(name, "details")
+
 	server, err := getServerByName(name)
 	if err != nil {
 		log.Fatal(server)
@@ -227,4 +239,33 @@ type Server struct {
 type Database struct {
 	Name   string
 	Server string
+}
+
+type Middleware func(http.HandlerFunc) http.HandlerFunc
+
+// Logging logs all requests with its path and the time it took to process
+func Logging() Middleware {
+
+	// Create a new Middleware
+	return func(f http.HandlerFunc) http.HandlerFunc {
+
+		// Define the http.HandlerFunc
+		return func(w http.ResponseWriter, r *http.Request) {
+			start := time.Now()
+
+			log.Println(r.URL.Path, time.Since(start))
+			defer func() { log.Println(r.URL.Path, time.Since(start)) }()
+
+			// Call the next middleware/handler in chain
+			f(w, r)
+		}
+	}
+}
+
+// Chain applies middlewares to a http.HandlerFunc
+func Chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
+	for _, m := range middlewares {
+		f = m(f)
+	}
+	return f
 }

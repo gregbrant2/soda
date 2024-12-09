@@ -4,19 +4,21 @@
 
 
 {{define "body"}}
+<article class="layout--flow">
+    <header>
+        <h2>Server details</h2>
+    </header>
 
-<h1>{{ .Name }}</h1>
-
-<div>
-    <h2>Server details</h2>
-    <dl>
-        <dt>Name</dt>
-        <dd>{{ .Name }}</dd>
-        <dt>Databases</dt>
-        <dd>{{ .Databases }}</dd>
-        <dt>IP address</dt>
-        <dd>{{ .IpAddress }}</dd>
-    </dl>
-</div>
+    <div class="layout--flow">
+        <dl>
+            <dt>Name</dt>
+            <dd>{{ .Name }}</dd>
+            <dt>Databases</dt>
+            <dd>{{ .Databases }}</dd>
+            <dt>IP address</dt>
+            <dd>{{ .IpAddress }}</dd>
+        </dl>
+    </div>
+</article>
 
 {{end}}
