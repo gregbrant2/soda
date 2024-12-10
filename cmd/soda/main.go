@@ -45,7 +45,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	fs := http.FileServer(http.Dir("../../web/static/"))
+	fs := http.FileServer(http.Dir("web/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	bindRoute(mux, "/", handleDashboard)
@@ -182,7 +182,7 @@ func handleServerNew(w http.ResponseWriter, r *http.Request) {
 }
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
-	tmpls := template.Must(template.ParseFiles("../../web/template/soda.tmpl", "../../web/template/"+name+".tmpl"))
+	tmpls := template.Must(template.ParseFiles("web/template/soda.tmpl", "web/template/"+name+".tmpl"))
 	err := tmpls.ExecuteTemplate(w, "soda.tmpl", data)
 
 	if err != nil {

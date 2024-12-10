@@ -1,4 +1,4 @@
-module github.com/gregbrant2/soda-server
+module github.com/gregbrant2/soda
 
 go 1.23.2
 

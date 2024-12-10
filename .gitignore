@@ -23,6 +23,7 @@ go.work.sum
 
 # env file
 .env
-src/tmp/build-errors.log
-tmp/build-errors.log
-src/tmp/main
+
+# Air
+tmp
+
