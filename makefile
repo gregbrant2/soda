@@ -1,4 +1,8 @@
 
+.PHONY : soda-dev
+soda-dev:
+	cd src; air
+	
 .PHONY : run
 run:
 	cd src;
@@ -13,6 +17,17 @@ start-soda-db:
 
 .PHONY : run-soda-db
 run-soda-db:
+	make start-soda-db
+	make migrate-up
+
+.PHONY : stop-soda-db
+stop-soda-db:
+	docker stop soda_system_mysql
+
+.PHONY : rebuild-soda-db
+rebuild-soda-db:
+	docker stop soda_system_mysql
+	docker rm soda_system_mysql
 	make start-soda-db
 	make migrate-up
 
