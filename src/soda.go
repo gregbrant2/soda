@@ -41,7 +41,7 @@ func main() {
 	bindRoute(mux, "/", handleDashboard)
 	bindRoute(mux, "/database/new", handleDatabaseNew)
 	bindRoute(mux, "/databases/{name}", handleDatabaseDetails)
-	bindRoute(mux, "/server/new", handleServerNew)
+	bindRoute(mux, "/servers/new", handleServerNew)
 	bindRoute(mux, "/servers/{name}", handleServerDetails)
 
 	err = http.ListenAndServe(":3030", mux)
@@ -60,8 +60,14 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	servers, err := getServers()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	renderTemplate(w, "dashboard", Dashboard{
 		Databases: dbs,
+		Servers:   servers,
 	})
 }
 
@@ -115,6 +121,10 @@ func handleServerDetails(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "server-details", Server{
 		Name:      server.Name,
 		IpAddress: server.IpAddress,
+		Type:      server.Type,
+		Port:      server.Port,
+		Username:  server.Username,
+		Password:  server.Password,
 		Status:    "OK",
 		Databases: 2,
 	})
@@ -122,28 +132,40 @@ func handleServerDetails(w http.ResponseWriter, r *http.Request) {
 
 func handleServerNew(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
+		log.Println("Adding server")
 		server := Server{
 			Name:      r.PostFormValue("name"),
 			IpAddress: r.PostFormValue("ipAddress"),
+			Port:      r.PostFormValue("port"),
+			Type:      r.PostFormValue("type"),
+			Username:  r.PostFormValue("username"),
+			Password:  r.PostFormValue("password"),
 		}
+
+		log.Println("Saving", server)
 
 		_, err := addServer(server)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("Adding server:", err)
 		}
 
-		http.Redirect(w, r, "/server/"+server.Name, http.StatusSeeOther)
+		log.Println("Done adding server")
+		http.Redirect(w, r, "/servers/"+server.Name, http.StatusSeeOther)
 	}
 
 	renderTemplate(w, "server-new", Server{
 		Name:      "",
 		IpAddress: "",
+		Username:  "",
+		Password:  "",
+		Type:      "mysql",
+		Port:      "3306",
 	})
 }
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
-	tmpls := template.Must(template.ParseFiles("views/soda.gohtml", "views/"+name+".gohtml"))
-	err := tmpls.ExecuteTemplate(w, "soda.gohtml", data)
+	tmpls := template.Must(template.ParseFiles("views/soda.tmpl", "views/"+name+".tmpl"))
+	err := tmpls.ExecuteTemplate(w, "soda.tmpl", data)
 
 	if err != nil {
 		log.Println(err)
@@ -200,7 +222,7 @@ func getDatabases() ([]Database, error) {
 }
 
 func addServer(server Server) (int64, error) {
-	res, err := db.Exec("INSERT INTO soda_servers (name, ip_address) VALUES (?, ?)", server.Name, server.IpAddress)
+	res, err := db.Exec("INSERT INTO soda_servers (name, ip_address, port, type, username, password) VALUES (?, ?, ?, ?, ?, ?)", server.Name, server.IpAddress, server.Port, server.Type, server.Username, server.Password)
 	if err != nil {
 		return 0, fmt.Errorf("addServer: %v", err)
 	}
@@ -211,6 +233,28 @@ func addServer(server Server) (int64, error) {
 	}
 
 	return id, nil
+}
+
+func getServers() ([]Server, error) {
+	rows, err := db.Query("SELECT name, type, ip_address, port FROM soda_servers")
+	if err != nil {
+		return nil, err
+	}
+
+	var servers []Server
+	for rows.Next() {
+		var s Server
+		if err := rows.Scan(&s.Name, &s.Type, &s.IpAddress, &s.Port); err != nil {
+			return servers, err
+		}
+		servers = append(servers, s)
+	}
+
+	if err = rows.Err(); err != nil {
+		return servers, err
+	}
+
+	return servers, nil
 }
 
 func getServerByName(name string) (Server, error) {
@@ -227,13 +271,18 @@ func getServerByName(name string) (Server, error) {
 
 type Dashboard struct {
 	Databases []Database
+	Servers   []Server
 }
 
 type Server struct {
 	Name      string
+	Type      string
 	Databases int
 	IpAddress string
+	Port      string
 	Status    string
+	Username  string
+	Password  string
 }
 
 type Database struct {
