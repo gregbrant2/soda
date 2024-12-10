@@ -1,0 +1,20 @@
+{{define "head"}}
+    <title>{{ .Name }} - database details - Soda</title>
+{{end}}
+
+{{define "subheader"}}
+<h2>{{ .Name }}<span> / database</span></h2>
+{{end}}
+
+{{define "body"}}
+
+<div>
+    <dl>
+        <dt>Name</dt>
+        <dd>{{ .Name }}</dd>
+        <dt>Server</dt>
+        <dd><a href="/servers/{{ .Server }}">{{ .Server }}</a></dd>
+    </dl>
+</div>
+
+{{end}}

@@ -1,14 +1,8 @@
 
 .PHONY : soda-dev
 soda-dev:
-	cd src; air
+	cd cmd/soda; air
 	
-.PHONY : run
-run:
-	cd src;
-	pwd;
-	go run soda.go
-
 .PHONY : start-soda-db
 start-soda-db:
 	docker run -p 3306:3306 --name soda_system_mysql -e MYSQL_ROOT_PASSWORD=password -d mysql;
@@ -33,23 +27,23 @@ rebuild-soda-db:
 
 .PHONY : migration
 migration:
-	migrate create -ext sql -dir src/migrations -seq $(name)
+	migrate create -ext sql -dir db/migrations -seq $(name)
 
 .PHONY : migrate-up
 migrate-up:
-	migrate -database 'mysql://root:password@/soda' -path src/migrations up $(count)
+	migrate -database 'mysql://root:password@/soda' -path db/migrations up $(count)
 
 .PHONY : migrate-up-one
 migrate-up-one:
-	migrate -database 'mysql://root:password@/soda' -path src/migrations up 1
+	migrate -database 'mysql://root:password@/soda' -path db/migrations up 1
 
 .PHONY : migrate-down
 migrate-down:
-	migrate -database 'mysql://root:password@/soda' -path src/migrations down $(count)
+	migrate -database 'mysql://root:password@/soda' -path db/migrations down $(count)
 
 .PHONY : migrate-down-one
 migrate-down-one:
-	migrate -database 'mysql://root:password@/soda' -path src/migrations down 1
+	migrate -database 'mysql://root:password@/soda' -path db/migrations down 1
 
 .PHONY : migrate-test-last
 migrate-test-last:
