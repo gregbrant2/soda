@@ -18,6 +18,15 @@ an API that can be used from a terraform provider and the like.
 
 ## Development
 
+### To Do
+
+- [ ] Create database on target server
+- [ ] Git versioning
+- [ ] Build docker container
+- [ ] User documentation
+- [ ] API
+- [ ] Server password encryption
+- [ ] Authn/Authz
 
 ### Database Migrations
 There are a bunch of targets in the makefile to make working with 
