@@ -1,0 +1,80 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/static/boilerplate.css">
+        <link rel="stylesheet" href="/static/soda.css">
+    
+        <link rel="icon" href="/static/favicon.ico" sizes="any">
+        <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+        <link rel="apple-touch-icon" href="/static/icon.png">
+    
+        <meta name="theme-color" content="#DE3163">
+
+        {{block "head" .}}{{end}}
+
+        <script src="/static/htmx.min.js"></script>
+    </head>
+    
+    <body>
+        <!--  -->
+
+
+
+        <div id="top" role="document">
+            <div class="page">
+              <header class="page__header layout--flow main-head">
+                <a href="/" id="logo-image">
+                    <img src="/static/logo-crop-64.png" alt="Soda" width="64" height="95"/>
+                </a>
+                <div class="layout--flow container--wide section">
+                  <h1><a href="/">Soda</a></h1>
+                  <p>Self-hOsted Database As a service.</p>
+                </div>
+              </header>
+
+              <section class="page__subheader">
+                <div>
+                    {{block "subheader" .}}{{end}}
+                </div>
+              </section>
+
+              <main class="page__content layout--flow-double">
+                <section id="text" class="container layout--flow-double">
+                    <article class="layout--flow">
+                        <!-- begin template body -->
+                        {{block "body" .}}{{end}}
+                        <!-- end template body -->
+                    </article>
+                </section>
+              </main>
+              <nav class="page__sidebar">
+                <div class="container">
+                    <ul>
+                        <li>
+                          <a href="/">Soda</a>
+                          <ul>
+                            <li><a href="/databases">Databases</a></li>
+                            <li><a href="/servers">Servers</a></li>
+                          </ul>
+                        </li>
+                    </ul>
+
+                </div>
+              </nav>
+        
+              <footer class="page__footer">
+                <div class="container">
+                    <p>&copy;2024 Greg Brant</p>
+                </div>
+              </footer>
+            </div>
+          </div>
+
+
+        <script src="/static/soda.js"></script>
+   
+    </body>
+  
+</html>

@@ -14,6 +14,15 @@ import (
 var db *sql.DB
 
 func main() {
+	log.Println(`
+   _____           _       
+  / ____|         | |      
+ | (___   ___   __| | __ _ 
+  \___ \ / _ \ / _` + "` |/ _`" + ` |
+  ____) | (_) | (_| | (_| |
+ |_____/ \___/ \__,_|\__,_|                           
+                           `)
+
 	cfg := mysql.Config{
 		User:   "root",
 		Passwd: "password",
@@ -35,7 +44,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	fs := http.FileServer(http.Dir("static/"))
+	fs := http.FileServer(http.Dir("../../web/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	bindRoute(mux, "/", handleDashboard)
@@ -164,7 +173,7 @@ func handleServerNew(w http.ResponseWriter, r *http.Request) {
 }
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
-	tmpls := template.Must(template.ParseFiles("views/soda.tmpl", "views/"+name+".tmpl"))
+	tmpls := template.Must(template.ParseFiles("../../web/template/soda.tmpl", "../../web/template/"+name+".tmpl"))
 	err := tmpls.ExecuteTemplate(w, "soda.tmpl", data)
 
 	if err != nil {

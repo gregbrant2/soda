@@ -1,0 +1,32 @@
+{{define "head"}}
+    <title>{{ .Name }} - server details - Soda</title>
+{{end}}
+
+
+{{define "body"}}
+<article class="layout--flow">
+    <header>
+        <h2>Server details</h2>
+    </header>
+
+    <div class="layout--flow">
+        <dl>
+            <dt>Name</dt>
+            <dd>{{ .Name }}</dd>
+            <dt>Type</dt>
+            <dd>{{ .Type }}</dd>
+            <dt>IP address</dt>
+            <dd>{{ .IpAddress }}</dd>
+            <dt>Port</dt>
+            <dd>{{ .Port }}</dd>
+            <dt>Databases</dt>
+            <dd>{{ .Databases }}</dd>
+            <dt>Username</dt>
+            <dd>{{ .Username }}</dd>
+            <dt>Password</dt>
+            <dd>{{ .Password }}</dd>
+        </dl>
+    </div>
+</article>
+
+{{end}}
