@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -49,9 +50,9 @@ func main() {
 
 	bindRoute(mux, "/", handleDashboard)
 	bindRoute(mux, "/database/new", handleDatabaseNew)
-	bindRoute(mux, "/databases/{name}", handleDatabaseDetails)
+	bindRoute(mux, "/databases/{id}", handleDatabaseDetails)
 	bindRoute(mux, "/servers/new", handleServerNew)
-	bindRoute(mux, "/servers/{name}", handleServerDetails)
+	bindRoute(mux, "/servers/{id}", handleServerDetails)
 
 	err = http.ListenAndServe(":3030", mux)
 	if err != nil {
@@ -81,19 +82,21 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDatabaseDetails(w http.ResponseWriter, r *http.Request) {
-	name := r.PathValue("name")
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+	if err != nil {
+		log.Println(err)
+		errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
 
-	log.Println(name, "details")
+	log.Println(id, "details")
 
-	db, err := getDatabaseByName(name)
+	db, err := getDatabaseById(id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	renderTemplate(w, "database-details", Database{
-		Name:   db.Name,
-		Server: db.Server,
-	})
+	renderTemplate(w, "database-details", db)
 }
 
 func handleDatabaseNew(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +111,7 @@ func handleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		http.Redirect(w, r, "/database/"+database.Name, http.StatusSeeOther)
+		http.Redirect(w, r, "/database/"+strconv.FormatInt(int64(database.Id), 10), http.StatusSeeOther)
 	}
 
 	renderTemplate(w, "database-new", Database{
@@ -118,16 +121,22 @@ func handleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleServerDetails(w http.ResponseWriter, r *http.Request) {
-	name := r.PathValue("name")
-
-	log.Println(name, "details")
-
-	server, err := getServerByName(name)
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 	if err != nil {
-		log.Fatal(server)
+		log.Println(err)
+		errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
+	log.Println(id, "details")
+
+	server, err := getServerById(id)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	renderTemplate(w, "server-details", Server{
+		Id:        server.Id,
 		Name:      server.Name,
 		IpAddress: server.IpAddress,
 		Type:      server.Type,
@@ -159,7 +168,7 @@ func handleServerNew(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Println("Done adding server")
-		http.Redirect(w, r, "/servers/"+server.Name, http.StatusSeeOther)
+		http.Redirect(w, r, "/servers/"+strconv.FormatInt(int64(server.Id), 10), http.StatusSeeOther)
 	}
 
 	renderTemplate(w, "server-new", Server{
@@ -182,6 +191,13 @@ func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
 	}
 }
 
+func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
+	w.WriteHeader(status)
+	if status == http.StatusNotFound {
+		fmt.Fprint(w, "custom 404")
+	}
+}
+
 func addDatabase(database Database) (int64, error) {
 	res, err := db.Exec("INSERT INTO soda_databases (name, server_name) VALUES (?, ?)", database.Name, database.Server)
 	if err != nil {
@@ -196,11 +212,23 @@ func addDatabase(database Database) (int64, error) {
 	return id, nil
 }
 
-func getDatabaseByName(name string) (Database, error) {
-	row := db.QueryRow("SELECT name, server_name FROM soda_databases WHERE name=?", name)
+func getDatabaseById(id int64) (Database, error) {
+	row := db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE id=?", id)
 
 	var d Database
-	err := row.Scan(&d.Name, &d.Server)
+	err := row.Scan(&d.Id, &d.Name, &d.Server)
+	if err != nil {
+		return d, err
+	}
+
+	return d, nil
+}
+
+func getDatabaseByName(name string) (Database, error) {
+	row := db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE name=?", name)
+
+	var d Database
+	err := row.Scan(&d.Id, &d.Name, &d.Server)
 	if err != nil {
 		return d, err
 	}
@@ -209,7 +237,7 @@ func getDatabaseByName(name string) (Database, error) {
 }
 
 func getDatabases() ([]Database, error) {
-	rows, err := db.Query("SELECT name, server_name FROM soda_databases")
+	rows, err := db.Query("SELECT id, name, server_name FROM soda_databases")
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +245,7 @@ func getDatabases() ([]Database, error) {
 	var databases []Database
 	for rows.Next() {
 		var d Database
-		if err := rows.Scan(&d.Name, &d.Server); err != nil {
+		if err := rows.Scan(&d.Id, &d.Name, &d.Server); err != nil {
 			return databases, err
 		}
 		databases = append(databases, d)
@@ -245,7 +273,8 @@ func addServer(server Server) (int64, error) {
 }
 
 func getServers() ([]Server, error) {
-	rows, err := db.Query("SELECT name, type, ip_address, port FROM soda_servers")
+	log.Println("Getting all servers")
+	rows, err := db.Query("SELECT id, name, type, ip_address, port FROM soda_servers")
 	if err != nil {
 		return nil, err
 	}
@@ -253,24 +282,39 @@ func getServers() ([]Server, error) {
 	var servers []Server
 	for rows.Next() {
 		var s Server
-		if err := rows.Scan(&s.Name, &s.Type, &s.IpAddress, &s.Port); err != nil {
+		if err := rows.Scan(&s.Id, &s.Name, &s.Type, &s.IpAddress, &s.Port); err != nil {
 			return servers, err
 		}
+		log.Println("Next", s)
 		servers = append(servers, s)
 	}
 
 	if err = rows.Err(); err != nil {
+		log.Println(err)
 		return servers, err
 	}
 
+	log.Println("Returning", servers)
 	return servers, nil
 }
 
-func getServerByName(name string) (Server, error) {
-	row := db.QueryRow("SELECT name, ip_address FROM soda_servers WHERE name=?", name)
+func getServerById(id int64) (Server, error) {
+	row := db.QueryRow("SELECT id, name, type, ip_address, port, username, password, (select COUNT(1) from soda_databases WHERE id = id) as databases FROM soda_servers WHERE id=?", id)
 
 	var server Server
-	err := row.Scan(&server.Name, &server.IpAddress)
+	err := row.Scan(&server.Id, &server.Name, &server.Type, &server.IpAddress, &server.Username, &server.Password, &server.Databases)
+	if err != nil {
+		return server, err
+	}
+
+	return server, nil
+}
+
+func getServerByName(name string) (Server, error) {
+	row := db.QueryRow("SELECT name, type, ip_address, port, username, password, (select COUNT(1) from soda_databases WHERE server_name = name) as databases FROM soda_servers WHERE name=?", name)
+
+	var server Server
+	err := row.Scan(&server.Id, &server.Name, &server.Type, &server.IpAddress, &server.Username, &server.Password, &server.Databases)
 	if err != nil {
 		return server, err
 	}
@@ -284,6 +328,7 @@ type Dashboard struct {
 }
 
 type Server struct {
+	Id        int
 	Name      string
 	Type      string
 	Databases int
@@ -295,6 +340,7 @@ type Server struct {
 }
 
 type Database struct {
+	Id     int
 	Name   string
 	Server string
 }

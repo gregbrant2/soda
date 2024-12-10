@@ -22,9 +22,9 @@
             <tbody>
                 {{ range .Databases }}
                     <tr>
-                        <td><a href="/databases/{{ .Name }}">{{ .Name }}</a></td>
-                        <td><a href="/servers/{{ .Server }}">{{ .Server }}</a></td>
-                        <td>OK</td>
+                        <td><a href="/databases/{{ .Id }}">{{ .Name }}</a></td>
+                        <td>{{ .Server }}</td>
+                        <td>{{ . }}</td>
                     </tr>
                 {{ end }}
                 </tbody>
@@ -54,13 +54,13 @@
                 </tr>
             </thead>
             <tbody>
-                {{ range .Databases }}
+                {{ range .Servers }}
                     <tr>
-                        <tr><a href="/servers/{{ .Name }}">{{ .Name }}</a></tr>
-                        <tr>{{ .Type }}</tr>
-                        <tr>{{ .IpAddress }}</tr>
-                        <tr>{{ .Port }}</tr>
-                        <tr>OK</tr>
+                        <td><a href="/servers/{{ .Id }}">{{ .Name }}</a></td>
+                        <td>{{ .Type }}</td>
+                        <td>{{ .IpAddress }}</td>
+                        <td>{{ .Port }}</td>
+                        <td>{{ . }}</td>
                     </tr>
                 {{ end }}
                 </tbody>
