@@ -27,6 +27,11 @@ an API that can be used from a terraform provider and the like.
 - [ ] API
 - [ ] Server password encryption
 - [ ] Authn/Authz
+    - [ ] Users
+    - [ ] Roles
+    - [ ] Permissions
+    - [ ] API Tokens
+- [ ] Row versioning (for change history / revert)
 
 ### Database Migrations
 There are a bunch of targets in the makefile to make working with 
