@@ -14,11 +14,21 @@
     <form action="/database/new" method="post" class="layout--flow">
         <div class="form-field">
             <label for="name">Name</label>
-            <input name="name" value="{{ .Name }}" required placeholder="Database name" />
+            <input name="name" value="{{ .Database.Name }}" required placeholder="Database name" />
         </div>
         <div class="form-field">
             <label for="server">Server</label>
-            <input name="server" value="{{ .Server }}" required placeholder="Server name" />
+            <select name="server"  required placeholder="Server name">
+            <option>Select</option>
+            {{ range .ServerNames }}
+            <option value="{{.}}"
+            {{ if eq $.Database.Server . }}
+             selected="selected"
+             {{end}}
+             >{{ . }}
+             </option>
+            {{ end }}
+            </select>
         </div>
         <div>
             <button type="submit">Add</button>

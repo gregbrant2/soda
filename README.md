@@ -20,10 +20,16 @@ an API that can be used from a terraform provider and the like.
 
 ### To Do
 
-- [ ] Create database on target server
+- [x] Create database on target server
+- [ ] Form validation
+    - [ ] New Server
+    - [ ] New Database
+- [ ] Sanitize queries
+- [ ] Transactions around create database operations
 - [ ] Git versioning
 - [ ] Build docker container
 - [ ] User documentation
+- [ ] Error handling (better than `log.Fatal`)
 - [ ] API
 - [ ] Server password encryption
 - [ ] Authn/Authz

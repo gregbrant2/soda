@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/elliotchance/pie/v2"
+
+	"github.com/gregbrant2/soda/internal/clients"
 	"github.com/gregbrant2/soda/internal/dataaccess"
 	"github.com/gregbrant2/soda/internal/entities"
 	"github.com/gregbrant2/soda/internal/viewmodels"
@@ -52,17 +55,48 @@ func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 			Server: r.PostFormValue("server"),
 		}
 
+		server, err := dataaccess.GetServerByName(database.Server)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		id, err := dataaccess.AddDatabase(database)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		http.Redirect(w, r, "/database/"+strconv.FormatInt(int64(id), 10), http.StatusSeeOther)
+		c := clients.MySqlClient{}
+		err = c.CreateDatabase(server, database.Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = c.CreateUser(server, database.Name, database.Name, database.Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		http.Redirect(w, r, "/databases/"+strconv.FormatInt(int64(id), 10), http.StatusSeeOther)
 	}
 
-	renderTemplate(w, "database-new", entities.Database{
-		Name:   "",
-		Server: "",
+	servers, err := dataaccess.GetServers()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	serverNames := pie.Map(
+		servers,
+		func(e entities.Server) string {
+			return e.Name
+		},
+	)
+
+	renderTemplate(w, "database-new", viewmodels.NewDatabase{
+		Database: entities.Database{
+			Name:   "",
+			Server: "",
+		},
+		ServerNames: serverNames,
 	})
 }
 

@@ -147,10 +147,10 @@ func GetServerById(id int64) (entities.Server, error) {
 }
 
 func GetServerByName(name string) (entities.Server, error) {
-	row := db.QueryRow("SELECT name, type, ip_address, port, username, password, (select COUNT(1) from soda_databases WHERE server_name = name) as databases FROM soda_servers WHERE name=?", name)
+	row := db.QueryRow("SELECT id, name, type, ip_address, port, username, password, (select COUNT(1) from soda_databases WHERE server_name = name) as 'db_count' FROM soda_servers WHERE name=?", name)
 
 	var server entities.Server
-	err := row.Scan(&server.Id, &server.Name, &server.Type, &server.IpAddress, &server.Username, &server.Password, &server.Databases)
+	err := row.Scan(&server.Id, &server.Name, &server.Type, &server.IpAddress, &server.Port, &server.Username, &server.Password, &server.Databases)
 	if err != nil {
 		return server, err
 	}
