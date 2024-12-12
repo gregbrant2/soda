@@ -21,11 +21,11 @@
             <select name="server"  required placeholder="Server name">
             <option>Select</option>
             {{ range .ServerNames }}
-            <option value="{{.}}"
+            <option value="{{.Name}}"
             {{ if eq $.Database.Server . }}
              selected="selected"
              {{end}}
-             >{{ . }}
+             >{{ .Name }}
              </option>
             {{ end }}
             </select>

@@ -1,7 +1,7 @@
 package entities
 
 type Server struct {
-	Id        int
+	Id        int64
 	Name      string
 	Type      string
 	Databases int
@@ -13,7 +13,7 @@ type Server struct {
 }
 
 type Database struct {
-	Id     int
+	Id     int64
 	Name   string
 	Server string
 }

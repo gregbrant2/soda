@@ -84,9 +84,18 @@ func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	var selectedServer entities.Server
+	selectedServerId := -1.(int64)
+	selectedServerQuery := r.URL.Query().Get("selectedServer")
+	if len(selectedServerQuery) > 0 {
+		selectedServerId = strconv.FormatInt(int64(selectedServerQuery), 10)
+
+		selectedServer = pie.FindFirstUsing(servers, func(s entities.Server) bool { return s.Id == selectedServerId })
+	}
+
 	serverNames := pie.Map(
 		servers,
-		func(e entities.Server) string {
+		func(e entities.Server) {
 			return e.Name
 		},
 	)
@@ -94,7 +103,7 @@ func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "database-new", viewmodels.NewDatabase{
 		Database: entities.Database{
 			Name:   "",
-			Server: "",
+			Server: selectedServer.Name,
 		},
 		ServerNames: serverNames,
 	})
