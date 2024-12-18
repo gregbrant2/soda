@@ -6,7 +6,7 @@ soda-dev:
 .PHONY : start-soda-db
 start-soda-db:
 	docker run -p 3306:3306 --name soda_system_mysql -e MYSQL_ROOT_PASSWORD=password -d mysql;
-	sleep 15;
+	sleep 20;
 	docker exec soda_system_mysql mysql -u root --password=password -Bse 'CREATE DATABASE soda;'
 
 .PHONY : run-soda-db

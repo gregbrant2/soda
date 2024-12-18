@@ -11,3 +11,8 @@ type NewDatabase struct {
 	Database    entities.Database
 	ServerNames []string
 }
+
+type DatabaseDetails struct {
+	Database entities.Database
+	Server   entities.Server
+}

@@ -121,7 +121,6 @@ func GetServers() ([]entities.Server, error) {
 		if err := rows.Scan(&s.Id, &s.Name, &s.Type, &s.IpAddress, &s.Port); err != nil {
 			return servers, err
 		}
-		log.Println("Next", s)
 		servers = append(servers, s)
 	}
 
@@ -130,7 +129,6 @@ func GetServers() ([]entities.Server, error) {
 		return servers, err
 	}
 
-	log.Println("Returning", servers)
 	return servers, nil
 }
 

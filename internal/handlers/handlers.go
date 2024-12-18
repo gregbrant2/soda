@@ -42,10 +42,18 @@ func HandleDatabaseDetails(w http.ResponseWriter, r *http.Request) {
 
 	db, err := dataaccess.GetDatabaseById(id)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error getting db by id", id, err)
 	}
 
-	renderTemplate(w, "database-details", db)
+	server, err := dataaccess.GetServerByName(db.Server)
+	if err != nil {
+		log.Fatal("Error getting server for db", db, err)
+	}
+
+	renderTemplate(w, "database-details", viewmodels.DatabaseDetails{
+		Database: db,
+		Server:   server,
+	})
 }
 
 func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
@@ -54,6 +62,8 @@ func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 			Name:   r.PostFormValue("name"),
 			Server: r.PostFormValue("server"),
 		}
+
+		log.Println("Adding database", database)
 
 		server, err := dataaccess.GetServerByName(database.Server)
 		if err != nil {
@@ -85,17 +95,20 @@ func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var selectedServer entities.Server
-	selectedServerId := -1.(int64)
-	selectedServerQuery := r.URL.Query().Get("selectedServer")
+	var selectedServerId int64 = -1
+	selectedServerQuery := r.URL.Query().Get("serverId")
 	if len(selectedServerQuery) > 0 {
-		selectedServerId = strconv.FormatInt(int64(selectedServerQuery), 10)
+		selectedServerId, err = strconv.ParseInt(selectedServerQuery, 10, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		selectedServer = pie.FindFirstUsing(servers, func(s entities.Server) bool { return s.Id == selectedServerId })
+		selectedServer = servers[pie.FindFirstUsing(servers, func(s entities.Server) bool { return s.Id == selectedServerId })]
 	}
 
 	serverNames := pie.Map(
 		servers,
-		func(e entities.Server) {
+		func(e entities.Server) string {
 			return e.Name
 		},
 	)
