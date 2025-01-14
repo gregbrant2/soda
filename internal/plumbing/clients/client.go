@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/gregbrant2/soda/internal/entities"
+	"github.com/gregbrant2/soda/internal/domain/entities"
 )
 
 type DbClient interface {

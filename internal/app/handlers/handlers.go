@@ -7,10 +7,11 @@ import (
 
 	"github.com/elliotchance/pie/v2"
 
-	"github.com/gregbrant2/soda/internal/clients"
-	"github.com/gregbrant2/soda/internal/dataaccess"
-	"github.com/gregbrant2/soda/internal/entities"
-	"github.com/gregbrant2/soda/internal/viewmodels"
+	"github.com/gregbrant2/soda/internal/app/viewmodels"
+	"github.com/gregbrant2/soda/internal/domain/dataaccess"
+	"github.com/gregbrant2/soda/internal/domain/entities"
+	"github.com/gregbrant2/soda/internal/domain/validation"
+	"github.com/gregbrant2/soda/internal/plumbing/clients"
 )
 
 func HandleDashboard(w http.ResponseWriter, r *http.Request) {
@@ -57,6 +58,30 @@ func HandleDatabaseDetails(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
+	servers, err := dataaccess.GetServers()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var selectedServer entities.Server
+	var selectedServerId int64 = -1
+	selectedServerQuery := r.URL.Query().Get("serverId")
+	if len(selectedServerQuery) > 0 {
+		selectedServerId, err = strconv.ParseInt(selectedServerQuery, 10, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		selectedServer = servers[pie.FindFirstUsing(servers, func(s entities.Server) bool { return s.Id == selectedServerId })]
+	}
+
+	vm := viewmodels.NewDatabase{
+		Database: entities.Database{
+			Server: selectedServer.Name,
+		},
+		Errors: nil,
+	}
+
 	if r.Method == http.MethodPost {
 		database := entities.Database{
 			Name:   r.PostFormValue("name"),
@@ -64,6 +89,15 @@ func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Println("Adding database", database)
+
+		valid, errors := validation.ValidateDatabaseNew(database)
+
+		if !valid {
+			vm.Errors = errors
+			vm.Database = database
+			handleDatabaseNewView(w, r, servers, vm)
+			return
+		}
 
 		server, err := dataaccess.GetServerByName(database.Server)
 		if err != nil {
@@ -89,23 +123,10 @@ func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/databases/"+strconv.FormatInt(int64(id), 10), http.StatusSeeOther)
 	}
 
-	servers, err := dataaccess.GetServers()
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleDatabaseNewView(w, r, servers, vm)
+}
 
-	var selectedServer entities.Server
-	var selectedServerId int64 = -1
-	selectedServerQuery := r.URL.Query().Get("serverId")
-	if len(selectedServerQuery) > 0 {
-		selectedServerId, err = strconv.ParseInt(selectedServerQuery, 10, 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		selectedServer = servers[pie.FindFirstUsing(servers, func(s entities.Server) bool { return s.Id == selectedServerId })]
-	}
-
+func handleDatabaseNewView(w http.ResponseWriter, r *http.Request, servers []entities.Server, vm viewmodels.NewDatabase) {
 	serverNames := pie.Map(
 		servers,
 		func(e entities.Server) string {
@@ -113,13 +134,8 @@ func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 
-	renderTemplate(w, "database-new", viewmodels.NewDatabase{
-		Database: entities.Database{
-			Name:   "",
-			Server: selectedServer.Name,
-		},
-		ServerNames: serverNames,
-	})
+	vm.ServerNames = serverNames
+	renderTemplate(w, "database-new", vm)
 }
 
 func HandleServerDetails(w http.ResponseWriter, r *http.Request) {

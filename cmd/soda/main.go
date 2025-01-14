@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gregbrant2/soda/internal/dataaccess"
-	"github.com/gregbrant2/soda/internal/handlers"
-	"github.com/gregbrant2/soda/internal/middlewares"
+	"github.com/gregbrant2/soda/internal/app/handlers"
+	"github.com/gregbrant2/soda/internal/domain/dataaccess"
+	"github.com/gregbrant2/soda/internal/plumbing/middlewares"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	fs := http.FileServer(http.Dir("web/static/"))
+	fs := http.FileServer(http.Dir("../../web/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	bindRoute(mux, "/", handlers.HandleDashboard)

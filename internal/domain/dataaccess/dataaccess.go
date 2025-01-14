@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/gregbrant2/soda/internal/entities"
+	"github.com/gregbrant2/soda/internal/domain/entities"
 )
 
 var db *sql.DB
@@ -60,16 +60,16 @@ func GetDatabaseById(id int64) (entities.Database, error) {
 	return d, nil
 }
 
-func GetDatabaseByName(name string) (entities.Database, error) {
+func GetDatabaseByName(name string) (*entities.Database, error) {
 	row := db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE name=?", name)
 
 	var d entities.Database
 	err := row.Scan(&d.Id, &d.Name, &d.Server)
 	if err != nil {
-		return d, err
+		return nil, err
 	}
 
-	return d, nil
+	return &d, nil
 }
 
 func GetDatabases() ([]entities.Database, error) {

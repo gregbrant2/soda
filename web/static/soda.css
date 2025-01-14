@@ -72,3 +72,13 @@ header.main-head img {
 .page__subheader h2 {
     font-size: 1rem;
 }
+
+.error {
+    color: var(--form_invalid-color);
+}
+
+input.error,
+select.error,
+button.error {
+    border: 1px solid var(--form_invalid-color);
+}

@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/gregbrant2/soda/internal/entities"
+	"github.com/gregbrant2/soda/internal/domain/entities"
 )
 
 type MySqlClient struct{}

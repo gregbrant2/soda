@@ -12,9 +12,19 @@
 <div>
     <p>Something about creating your new database.</p>
     <form action="/database/new" method="post" class="layout--flow">
+    <pre>
+        {{ .Errors }}
+    </pre>
         <div class="form-field">
             <label for="name">Name</label>
-            <input name="name" value="{{ .Database.Name }}" required placeholder="Database name" />
+            <input name="name" value="{{ .Database.Name }}" required placeholder="Database name"
+            {{ if .Errors.Name}}
+            class="error"
+            {{ end }}
+             />
+            {{ if .Errors.Name}}
+                <span class="error">{{ index .Errors "Name" }}</span>
+            {{ end }}
         </div>
         <div class="form-field">
             <label for="server">Server</label>

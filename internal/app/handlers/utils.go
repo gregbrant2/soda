@@ -4,12 +4,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"text/template"
 )
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
-	tmpls := template.Must(template.ParseFiles("web/template/soda.tmpl", "web/template/"+name+".tmpl"))
-	err := tmpls.ExecuteTemplate(w, "soda.tmpl", data)
+	log.Println(filepath.Abs("../../web/template"))
+	info, err := os.Stat("../../web/template")
+	log.Println(info.Name(), info.IsDir(), err)
+	tmpls := template.Must(template.ParseFiles("../../web/template/soda.tmpl", "../../web/template/"+name+".tmpl"))
+	err = tmpls.ExecuteTemplate(w, "soda.tmpl", data)
 
 	if err != nil {
 		log.Println(err)

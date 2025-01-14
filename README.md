@@ -28,6 +28,7 @@ an API that can be used from a terraform provider and the like.
 - [ ] Transactions around create database operations
 - [ ] Git versioning
 - [ ] Build docker container
+    - [ ] Probably need to fix path issues with templates and static files, so can be run outside of Air.
 - [ ] User documentation
 - [ ] Error handling (better than `log.Fatal`)
 - [ ] API
@@ -40,6 +41,7 @@ an API that can be used from a terraform provider and the like.
 - [ ] Row versioning (for change history / revert)
 
 ### Database Migrations
+Migrations arevia https://github.com/golang-migrate/migrate. 
 There are a bunch of targets in the makefile to make working with 
 the database simpler.
 

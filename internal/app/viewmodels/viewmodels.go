@@ -1,6 +1,6 @@
 package viewmodels
 
-import "github.com/gregbrant2/soda/internal/entities"
+import "github.com/gregbrant2/soda/internal/domain/entities"
 
 type Dashboard struct {
 	Databases []entities.Database
@@ -10,6 +10,7 @@ type Dashboard struct {
 type NewDatabase struct {
 	Database    entities.Database
 	ServerNames []string
+	Errors      map[string]string
 }
 
 type DatabaseDetails struct {
