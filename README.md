@@ -23,7 +23,7 @@ an API that can be used from a terraform provider and the like.
 - [x] Create database on target server
 - [ ] Form validation
     - [ ] New Server
-    - [ ] New Database
+    - [x] New Database
 - [ ] Sanitize queries
 - [ ] Transactions around create database operations
 - [ ] Git versioning
