@@ -17,3 +17,8 @@ type DatabaseDetails struct {
 	Database entities.Database
 	Server   entities.Server
 }
+
+type NewServer struct {
+	Server *entities.Server
+	Errors map[string]string
+}

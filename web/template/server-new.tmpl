@@ -12,29 +12,69 @@
     <p>Enter the server connection details below. 
         The account specified should have permissions to create users and databases.</p>
     <form action="/servers/new" method="post" class="layout--flow">
+    <pre>
+        {{ .Errors }}
+    </pre>
+
         <div class="form-field">
             <label for="name">Name</label>
-            <input name="name" value="{{ .Name }}" required placeholder="Server name" />
+            <input name="name" value="{{ .Server.Name }}" required placeholder="Server name"
+             {{ if .Errors.Name}}
+            class="error"
+            {{ end }} />
+            {{ if .Errors.Name}}
+                <span class="error">{{ index .Errors "Name" }}</span>
+            {{ end }}
         </div>
         <div class="form-field">
             <label for="ipAddress">Hostname / IP Address</label>
-            <input name="ipAddress" value="{{ .IpAddress }}" required placeholder="localhost / 10.0.0.36" />
+            <input name="ipAddress" value="{{ .Server.IpAddress }}" required placeholder="localhost / 10.0.0.36"
+             {{ if .Errors.IpAddress}}
+            class="error"
+            {{ end }} />
+            {{ if .Errors.IpAddress}}
+                <span class="error">{{ index .Errors "IpAddress" }}</span>
+            {{ end }}
         </div>
         <div class="form-field">
             <label for="port">Port</label>
-            <input name="port" value="{{ .Port }}" required placeholder="3306" />
+            <input name="port" value="{{ .Server.Port }}" required placeholder="3306"
+             {{ if .Errors.Port}}
+            class="error"
+            {{ end }} />
+            {{ if .Errors.Port}}
+                <span class="error">{{ index .Errors "Port" }}</span>
+            {{ end }}
         </div>
         <div class="form-field">
             <label for="type">Type</label>
-            <input name="type" value="mysql" required disabled />
+            <input name="type" value="{{ .Server.Type }}" required readonly
+             {{ if .Errors.Type}}
+            class="error"
+            {{ end }} />
+            {{ if .Errors.Type}}
+                <span class="error">{{ index .Errors "Type" }}</span>
+            {{ end }}
         </div>
         <div class="form-field">
             <label for="username">Username</label>
-            <input name="username" value="{{ .Username }}" required placeholder="admin" />
+            <input name="username" value="{{ .Server.Username }}" required placeholder="admin"
+             {{ if .Errors.Username}}
+            class="error"
+            {{ end }} />
+            {{ if .Errors.Username}}
+                <span class="error">{{ index .Errors "Username" }}</span>
+            {{ end }}
         </div>
         <div class="form-field">
             <label for="password">Password</label>
-            <input name="password" value="{{ .Password }}" required placeholder="********" />
+            <input name="password" value="{{ .Server.Password }}" required placeholder="********"
+             {{ if .Errors.Password}}
+            class="error"
+            {{ end }} />
+            {{ if .Errors.Password}}
+                <span class="error">{{ index .Errors "Password" }}</span>
+            {{ end }}
         </div>
         <div>
             <button type="submit">Add</button>

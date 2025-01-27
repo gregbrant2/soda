@@ -21,9 +21,10 @@ an API that can be used from a terraform provider and the like.
 ### To Do
 
 - [x] Create database on target server
-- [ ] Form validation
-    - [ ] New Server
+- [x] Form validation
+    - [x] New Server
     - [x] New Database
+    - [ ] Unit tests
 - [ ] Sanitize queries
 - [ ] Transactions around create database operations
 - [ ] Git versioning

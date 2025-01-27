@@ -53,7 +53,7 @@ func HandleDatabaseDetails(w http.ResponseWriter, r *http.Request) {
 
 	renderTemplate(w, "database-details", viewmodels.DatabaseDetails{
 		Database: db,
-		Server:   server,
+		Server:   *server,
 	})
 }
 
@@ -109,13 +109,13 @@ func HandleDatabaseNew(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		c := clients.MySqlClient{}
-		err = c.CreateDatabase(server, database.Name)
+		c, err := clients.CreateServer(*server)
+		err = c.CreateDatabase(*server, database.Name)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = c.CreateUser(server, database.Name, database.Name, database.Name)
+		err = c.CreateUser(*server, database.Name, database.Name, database.Name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -167,6 +167,8 @@ func HandleServerDetails(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleServerNew(w http.ResponseWriter, r *http.Request) {
+	vm := viewmodels.NewServer{}
+
 	if r.Method == http.MethodPost {
 		log.Println("Adding server")
 		server := entities.Server{
@@ -180,6 +182,14 @@ func HandleServerNew(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("Saving", server)
 
+		valid, errors := validation.ValidateServerNew(server)
+		if !valid {
+			vm.Errors = errors
+			vm.Server = &server
+			handleServerNewView(w, vm)
+			return
+		}
+
 		id, err := dataaccess.AddServer(server)
 		if err != nil {
 			log.Fatal("Adding server:", err)
@@ -189,12 +199,20 @@ func HandleServerNew(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/servers/"+strconv.FormatInt(int64(id), 10), http.StatusSeeOther)
 	}
 
-	renderTemplate(w, "server-new", entities.Server{
-		Name:      "",
-		IpAddress: "",
-		Username:  "",
-		Password:  "",
-		Type:      "mysql",
-		Port:      "3306",
-	})
+	handleServerNewView(w, vm)
+}
+
+func handleServerNewView(w http.ResponseWriter, vm viewmodels.NewServer) {
+	if vm.Server == nil {
+		vm.Server = &entities.Server{
+			Name:      "",
+			IpAddress: "",
+			Username:  "",
+			Password:  "",
+			Type:      "mysql",
+			Port:      "3306",
+		}
+	}
+
+	renderTemplate(w, "server-new", vm)
 }

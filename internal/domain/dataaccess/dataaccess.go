@@ -132,26 +132,24 @@ func GetServers() ([]entities.Server, error) {
 	return servers, nil
 }
 
-func GetServerById(id int64) (entities.Server, error) {
+func GetServerById(id int64) (*entities.Server, error) {
 	row := db.QueryRow("SELECT id, name, type, ip_address, port, username, password, (select COUNT(1) from soda_databases WHERE soda_databases.id = soda_servers.id) as 'db_count' FROM soda_servers WHERE id=?", id)
 
 	var server entities.Server
-	err := row.Scan(&server.Id, &server.Name, &server.Type, &server.IpAddress, &server.Port, &server.Username, &server.Password, &server.Databases)
-	if err != nil {
-		return server, err
+	if err := row.Scan(&server.Id, &server.Name, &server.Type, &server.IpAddress, &server.Port, &server.Username, &server.Password, &server.Databases); err != nil {
+		return nil, err
 	}
 
-	return server, nil
+	return &server, nil
 }
 
-func GetServerByName(name string) (entities.Server, error) {
+func GetServerByName(name string) (*entities.Server, error) {
 	row := db.QueryRow("SELECT id, name, type, ip_address, port, username, password, (select COUNT(1) from soda_databases WHERE server_name = name) as 'db_count' FROM soda_servers WHERE name=?", name)
 
 	var server entities.Server
-	err := row.Scan(&server.Id, &server.Name, &server.Type, &server.IpAddress, &server.Port, &server.Username, &server.Password, &server.Databases)
-	if err != nil {
-		return server, err
+	if err := row.Scan(&server.Id, &server.Name, &server.Type, &server.IpAddress, &server.Port, &server.Username, &server.Password, &server.Databases); err != nil {
+		return nil, err
 	}
 
-	return server, nil
+	return &server, nil
 }
