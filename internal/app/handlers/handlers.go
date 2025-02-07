@@ -14,14 +14,14 @@ import (
 	"github.com/gregbrant2/soda/internal/plumbing/clients"
 )
 
-func HandleDashboard(dbr dataaccess.DatabaseRepository) http.HandlerFunc {
+func HandleDashboard(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dbs, err := dbr.GetDatabases()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		servers, err := dataaccess.GetServers()
+		servers, err := sr.GetServers()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -33,7 +33,7 @@ func HandleDashboard(dbr dataaccess.DatabaseRepository) http.HandlerFunc {
 	}
 }
 
-func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository) http.HandlerFunc {
+func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 		if err != nil {
@@ -49,7 +49,7 @@ func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository) http.HandlerFunc {
 			log.Fatal("Error getting db by id", id, err)
 		}
 
-		server, err := dataaccess.GetServerByName(db.Server)
+		server, err := sr.GetServerByName(db.Server)
 		if err != nil {
 			log.Fatal("Error getting server for db", db, err)
 		}
@@ -61,9 +61,9 @@ func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository) http.HandlerFunc {
 	}
 }
 
-func HandleDatabaseNew(dbr dataaccess.DatabaseRepository) http.HandlerFunc {
+func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		servers, err := dataaccess.GetServers()
+		servers, err := sr.GetServers()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -104,7 +104,7 @@ func HandleDatabaseNew(dbr dataaccess.DatabaseRepository) http.HandlerFunc {
 				return
 			}
 
-			server, err := dataaccess.GetServerByName(database.Server)
+			server, err := sr.GetServerByName(database.Server)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -144,68 +144,72 @@ func handleDatabaseNewView(w http.ResponseWriter, r *http.Request, servers []ent
 	renderTemplate(w, "database-new", vm)
 }
 
-func HandleServerDetails(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
-	if err != nil {
-		log.Println(err)
-		errorHandler(w, r, http.StatusBadRequest)
-		return
-	}
-
-	log.Println(id, "details")
-
-	server, err := dataaccess.GetServerById(id)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	renderTemplate(w, "server-details", entities.Server{
-		Id:        server.Id,
-		Name:      server.Name,
-		IpAddress: server.IpAddress,
-		Type:      server.Type,
-		Port:      server.Port,
-		Username:  server.Username,
-		Password:  server.Password,
-		Status:    "OK",
-		Databases: 2,
-	})
-}
-
-func HandleServerNew(w http.ResponseWriter, r *http.Request) {
-	vm := viewmodels.NewServer{}
-
-	if r.Method == http.MethodPost {
-		log.Println("Adding server")
-		server := entities.Server{
-			Name:      r.PostFormValue("name"),
-			IpAddress: r.PostFormValue("ipAddress"),
-			Port:      r.PostFormValue("port"),
-			Type:      r.PostFormValue("type"),
-			Username:  r.PostFormValue("username"),
-			Password:  r.PostFormValue("password"),
-		}
-
-		log.Println("Saving", server)
-
-		valid, errors := validation.ValidateServerNew(server)
-		if !valid {
-			vm.Errors = errors
-			vm.Server = &server
-			handleServerNewView(w, vm)
+func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+		if err != nil {
+			log.Println(err)
+			errorHandler(w, r, http.StatusBadRequest)
 			return
 		}
 
-		id, err := dataaccess.AddServer(server)
+		log.Println(id, "details")
+
+		server, err := sr.GetServerById(id)
 		if err != nil {
-			log.Fatal("Adding server:", err)
+			log.Fatal(err)
 		}
 
-		log.Println("Done adding server")
-		http.Redirect(w, r, "/servers/"+strconv.FormatInt(int64(id), 10), http.StatusSeeOther)
+		renderTemplate(w, "server-details", entities.Server{
+			Id:        server.Id,
+			Name:      server.Name,
+			IpAddress: server.IpAddress,
+			Type:      server.Type,
+			Port:      server.Port,
+			Username:  server.Username,
+			Password:  server.Password,
+			Status:    "OK",
+			Databases: 2,
+		})
 	}
+}
 
-	handleServerNewView(w, vm)
+func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vm := viewmodels.NewServer{}
+
+		if r.Method == http.MethodPost {
+			log.Println("Adding server")
+			server := entities.Server{
+				Name:      r.PostFormValue("name"),
+				IpAddress: r.PostFormValue("ipAddress"),
+				Port:      r.PostFormValue("port"),
+				Type:      r.PostFormValue("type"),
+				Username:  r.PostFormValue("username"),
+				Password:  r.PostFormValue("password"),
+			}
+
+			log.Println("Saving", server)
+
+			valid, errors := validation.ValidateServerNew(sr, server)
+			if !valid {
+				vm.Errors = errors
+				vm.Server = &server
+				handleServerNewView(w, vm)
+				return
+			}
+
+			id, err := sr.AddServer(server)
+			if err != nil {
+				log.Fatal("Adding server:", err)
+			}
+
+			log.Println("Done adding server")
+			http.Redirect(w, r, "/servers/"+strconv.FormatInt(int64(id), 10), http.StatusSeeOther)
+		}
+
+		handleServerNewView(w, vm)
+	}
 }
 
 func handleServerNewView(w http.ResponseWriter, vm viewmodels.NewServer) {

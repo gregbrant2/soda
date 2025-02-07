@@ -23,17 +23,18 @@ func main() {
 	defer db.Close()
 
 	dbr := dataaccess.NewMySqlDatabaseRepository(db)
+	sr := dataaccess.NewMySqlServerRepository(db)
 
 	mux := http.NewServeMux()
 
 	fs := http.FileServer(http.Dir("../../web/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	bindRoute(mux, "/", handlers.HandleDashboard(dbr))
-	bindRoute(mux, "/database/new", handlers.HandleDatabaseNew(dbr))
-	bindRoute(mux, "/databases/{id}", handlers.HandleDatabaseDetails(dbr))
-	bindRoute(mux, "/servers/new", handlers.HandleServerNew)
-	bindRoute(mux, "/servers/{id}", handlers.HandleServerDetails)
+	bindRoute(mux, "/", handlers.HandleDashboard(dbr, sr))
+	bindRoute(mux, "/database/new", handlers.HandleDatabaseNew(dbr, sr))
+	bindRoute(mux, "/databases/{id}", handlers.HandleDatabaseDetails(dbr, sr))
+	bindRoute(mux, "/servers/new", handlers.HandleServerNew(sr))
+	bindRoute(mux, "/servers/{id}", handlers.HandleServerDetails(sr))
 
 	err := http.ListenAndServe(":3030", mux)
 	if err != nil {
