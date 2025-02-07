@@ -34,66 +34,6 @@ func Initialize() *sql.DB {
 	return db
 }
 
-func AddDatabase(database entities.Database) (int64, error) {
-	res, err := db.Exec("INSERT INTO soda_databases (name, server_name) VALUES (?, ?)", database.Name, database.Server)
-	if err != nil {
-		return 0, fmt.Errorf("addDatabase: %v", err)
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("addDatabase: %v", err)
-	}
-
-	return id, nil
-}
-
-func GetDatabaseById(id int64) (entities.Database, error) {
-	row := db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE id=?", id)
-
-	var d entities.Database
-	err := row.Scan(&d.Id, &d.Name, &d.Server)
-	if err != nil {
-		return d, err
-	}
-
-	return d, nil
-}
-
-func GetDatabaseByName(name string) (*entities.Database, error) {
-	row := db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE name=?", name)
-
-	var d entities.Database
-	err := row.Scan(&d.Id, &d.Name, &d.Server)
-	if err != nil {
-		return nil, err
-	}
-
-	return &d, nil
-}
-
-func GetDatabases() ([]entities.Database, error) {
-	rows, err := db.Query("SELECT id, name, server_name FROM soda_databases")
-	if err != nil {
-		return nil, err
-	}
-
-	var databases []entities.Database
-	for rows.Next() {
-		var d entities.Database
-		if err := rows.Scan(&d.Id, &d.Name, &d.Server); err != nil {
-			return databases, err
-		}
-		databases = append(databases, d)
-	}
-
-	if err = rows.Err(); err != nil {
-		return databases, err
-	}
-
-	return databases, nil
-}
-
 func AddServer(server entities.Server) (int64, error) {
 	res, err := db.Exec("INSERT INTO soda_servers (name, ip_address, port, type, username, password) VALUES (?, ?, ?, ?, ?, ?)", server.Name, server.IpAddress, server.Port, server.Type, server.Username, server.Password)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 	"github.com/gregbrant2/soda/internal/domain/entities"
 )
 
-func ValidateDatabaseNew(database entities.Database) (bool, map[string]string) {
+func ValidateDatabaseNew(r dataaccess.DatabaseRepository, database entities.Database) (bool, map[string]string) {
 	var errors = make(map[string]string)
 	var namePattern = regexp.MustCompile(`\w`)
 
@@ -22,7 +22,7 @@ func ValidateDatabaseNew(database entities.Database) (bool, map[string]string) {
 		errors["Name"] = "Please enter a valid database name"
 	}
 
-	existing, _ := dataaccess.GetDatabaseByName(database.Name)
+	existing, _ := r.GetDatabaseByName(database.Name)
 	// TODO: Figure out the pattern here.
 	//       err would be !nil but that's right when existing is nil
 	//       but what if there's a real error, not just "database not found"?

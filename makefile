@@ -2,6 +2,10 @@
 .PHONY : soda-dev
 soda-dev:
 	cd cmd/soda; air
+
+.PHONY : soda-test
+soda-test:
+	go test ./...
 	
 .PHONY : start-soda-db
 start-soda-db:

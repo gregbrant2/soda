@@ -22,14 +22,16 @@ func main() {
 	db := dataaccess.Initialize()
 	defer db.Close()
 
+	dbr := dataaccess.NewMySqlDatabaseRepository(db)
+
 	mux := http.NewServeMux()
 
 	fs := http.FileServer(http.Dir("../../web/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	bindRoute(mux, "/", handlers.HandleDashboard)
-	bindRoute(mux, "/database/new", handlers.HandleDatabaseNew)
-	bindRoute(mux, "/databases/{id}", handlers.HandleDatabaseDetails)
+	bindRoute(mux, "/", handlers.HandleDashboard(dbr))
+	bindRoute(mux, "/database/new", handlers.HandleDatabaseNew(dbr))
+	bindRoute(mux, "/databases/{id}", handlers.HandleDatabaseDetails(dbr))
 	bindRoute(mux, "/servers/new", handlers.HandleServerNew)
 	bindRoute(mux, "/servers/{id}", handlers.HandleServerDetails)
 
