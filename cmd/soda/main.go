@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gregbrant2/soda/internal/api"
 	"github.com/gregbrant2/soda/internal/app"
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
 )
@@ -26,6 +27,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	app.RegisterRoutes(dbr, sr, mux)
+	api.RegisterRoutes(dbr, sr, mux)
 
 	err := http.ListenAndServe(":3030", mux)
 	if err != nil {
