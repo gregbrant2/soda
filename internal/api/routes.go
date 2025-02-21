@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/gregbrant2/soda/internal/api/handlers"
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
 	"github.com/gregbrant2/soda/internal/plumbing/routing"
 )
@@ -12,8 +13,8 @@ func RegisterRoutes(
 	sr dataaccess.ServerRepository,
 	mux *http.ServeMux) {
 
-	routing.BindRoute(mux, "/api/servers", emptyHandler())
-	routing.BindRoute(mux, "/api/server/{id}", emptyHandler())
+	routing.BindRoute(mux, "/api/servers", handlers.HandleServers(dbr, sr))
+	routing.BindRoute(mux, "/api/server/{id}", handlers.HandleServerDetails(sr))
 	routing.BindRoute(mux, "/api/server/new", emptyHandler())
 	routing.BindRoute(mux, "/api/databases", emptyHandler())
 	routing.BindRoute(mux, "/api/database/{id}", emptyHandler())
