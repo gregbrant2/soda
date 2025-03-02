@@ -1,0 +1,60 @@
+{
+	"info": {
+		"_postman_id": "204ce052-618c-40be-b08a-49926ce3ed88",
+		"name": "SODA Local",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41847985"
+	},
+	"item": [
+		{
+			"name": "Add Server",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Name\": \"Fish71\",\r\n    \"Type\":\"mysql\",\r\n    \"ipAddress\":\"127.0.0.1\",\r\n    \"port\": \"3306\",\r\n    \"username\": \"admin\",\r\n    \"password\": \"admin\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3030/api/server/new",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3030",
+					"path": [
+						"api",
+						"server",
+						"new"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Servers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3030/api/servers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3030",
+					"path": [
+						"api",
+						"servers"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
