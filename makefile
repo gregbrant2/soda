@@ -5,7 +5,7 @@ soda-dev:
 
 .PHONY : soda-test
 soda-test:
-	go test ./...
+	go test -v -cover ./...
 	
 .PHONY : start-soda-db
 start-soda-db:
