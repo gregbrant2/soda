@@ -5,3 +5,8 @@ type Database struct {
 	Name   string
 	Server string
 }
+
+type NewDatabase struct {
+	Name   string
+	Server string
+}

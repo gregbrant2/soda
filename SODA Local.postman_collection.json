@@ -117,6 +117,35 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Add Database",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Name\": \"Bananas1\",\r\n    \"Server\": \"Fish7\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3030/api/database",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3030",
+					"path": [
+						"api",
+						"database"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

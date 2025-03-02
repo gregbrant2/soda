@@ -42,63 +42,67 @@ func (r FakeDatabaseRepository) GetDatabases() ([]entities.Database, error) {
 }
 
 func TestValidateDatabaseNewSuccess(t *testing.T) {
-	r := &FakeDatabaseRepository{}
+	dbr := FakeDatabaseRepository{}
+	sr := FakeServerRepository{}
 
 	database := entities.Database{
 		Name:   "Foo",
 		Server: "Bar",
 	}
 
-	valid, errors := ValidateDatabaseNew(r, database)
+	valid, errors := ValidateDatabaseNew(dbr, sr, database)
 	if !valid || len(errors) > 0 {
 		t.Fatal("Database should have been valid")
 	}
 }
 
 func TestValidateDatabaseNewEmptyErrors(t *testing.T) {
-	r := &FakeDatabaseRepository{}
+	r := FakeDatabaseRepository{}
+	sr := FakeServerRepository{}
 
 	database := entities.Database{}
 
-	valid, errors := ValidateDatabaseNew(r, database)
+	valid, errors := ValidateDatabaseNew(r, sr, database)
 	if valid || len(errors) < 1 {
 		t.Fatal("Database should have been invalid", errors)
 	}
 }
 
 func TestValidateDatabaseNewExistingNameErrors(t *testing.T) {
-	r := &FakeDatabaseRepository{
+	dbr := FakeDatabaseRepository{
 		getDatabaseByNameResult: entities.Database{
 			Name:   "Name1",
 			Server: "Server1",
 		},
 	}
+	sr := FakeServerRepository{}
 
 	database := entities.Database{
 		Name:   "Name1",
 		Server: "Server1",
 	}
 
-	valid, errors := ValidateDatabaseNew(r, database)
+	valid, errors := ValidateDatabaseNew(dbr, sr, database)
 	if valid || len(errors) < 1 {
 		t.Fatal("Database should have been invalid due to name clash")
 	}
 }
 
 func TestValidateDatabaseNewExistingNameDifferentServerValid(t *testing.T) {
-	r := &FakeDatabaseRepository{
+	dbr := FakeDatabaseRepository{
 		getDatabaseByNameResult: entities.Database{
 			Name:   "Name1",
 			Server: "Server1",
 		},
 	}
+	sr := FakeServerRepository{}
 
 	database := entities.Database{
 		Name:   "Name1",
 		Server: "Server2",
 	}
 
-	valid, errors := ValidateDatabaseNew(r, database)
+	valid, errors := ValidateDatabaseNew(dbr, sr, database)
 	if !valid || len(errors) > 0 {
 		t.Fatal("Database should have been valid due to different sever name")
 	}

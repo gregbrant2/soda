@@ -43,3 +43,10 @@ func MapDatabase(entity entities.Database) dtos.Database {
 		Server: entity.Server,
 	}
 }
+
+func MapNewDatabase(entity dtos.NewDatabase) entities.Database {
+	return entities.Database{
+		Name:   entity.Name,
+		Server: entity.Server,
+	}
+}

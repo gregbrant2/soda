@@ -95,7 +95,7 @@ func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRe
 
 			log.Println("Adding database", database)
 
-			valid, errors := validation.ValidateDatabaseNew(dbr, database)
+			valid, errors := validation.ValidateDatabaseNew(dbr, sr, database)
 
 			if !valid {
 				vm.Errors = errors

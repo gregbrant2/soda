@@ -132,6 +132,40 @@ func HandleDatabaseDetails(sr dataaccess.DatabaseRepository) http.HandlerFunc {
 	}
 }
 
+func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Attempting to create new database")
+		var payload dtos.NewDatabase
+		err := json.NewDecoder(r.Body).Decode(&payload)
+
+		if err != nil {
+			log.Println("Error decoding JSON request")
+			log.Println(err)
+			handleError(w, http.StatusBadRequest, err.Error(), nil)
+			return
+		}
+
+		database := mapping.MapNewDatabase(payload)
+		valid, errors := validation.ValidateDatabaseNew(dbr, sr, database)
+		if !valid {
+			log.Println("Validation errors were encountered", errors)
+			handleError(w, http.StatusBadRequest, "Invalid payload", errors)
+			return
+		}
+
+		dbId, err := dbr.AddDatabase(database)
+		if err != nil {
+			handleError(w, http.StatusInternalServerError, err.Error(), nil)
+			return
+		}
+
+		result := mapping.MapDatabase(database)
+		result.Id = dbId
+
+		returnJson(w, result)
+	}
+}
+
 func notFound(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotFound)
 }

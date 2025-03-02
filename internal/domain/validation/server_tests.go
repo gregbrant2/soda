@@ -26,9 +26,9 @@ func (r FakeServerRepository) AddServer(Server entities.Server) (int64, error) {
 	return r.addServerResult, r.addServerError
 }
 
-func (r FakeServerRepository) GetServerById(id int64) (entities.Server, error) {
+func (r FakeServerRepository) GetServerById(id int64) (*entities.Server, error) {
 	r.getServerByIdCalled = true
-	return r.getServerByIdResult, r.getServerByIdError
+	return &r.getServerByIdResult, r.getServerByIdError
 }
 
 func (r FakeServerRepository) GetServerByName(name string) (*entities.Server, error) {

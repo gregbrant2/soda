@@ -18,7 +18,7 @@ func RegisterRoutes(
 	routing.BindRoute(mux, "/api/server", handlers.HandleServerNew(sr))
 	routing.BindRoute(mux, "/api/databases", handlers.HandleDatabases(dbr, sr))
 	routing.BindRoute(mux, "/api/database/{id}", handlers.HandleDatabaseDetails(dbr))
-	routing.BindRoute(mux, "/api/database", emptyHandler())
+	routing.BindRoute(mux, "/api/database", handlers.HandleDatabaseNew(dbr, sr))
 }
 
 func emptyHandler() http.HandlerFunc {
