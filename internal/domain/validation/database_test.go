@@ -26,9 +26,9 @@ func (r FakeDatabaseRepository) AddDatabase(database entities.Database) (int64, 
 	return r.addDatabaseResult, r.addDatabaseError
 }
 
-func (r FakeDatabaseRepository) GetDatabaseById(id int64) (entities.Database, error) {
+func (r FakeDatabaseRepository) GetDatabaseById(id int64) (*entities.Database, error) {
 	r.getDatabaseByIdCalled = true
-	return r.getDatabaseByIdResult, r.getDatabaseByIdError
+	return &r.getDatabaseByIdResult, r.getDatabaseByIdError
 }
 
 func (r FakeDatabaseRepository) GetDatabaseByName(name string) (*entities.Database, error) {

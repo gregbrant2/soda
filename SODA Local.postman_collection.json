@@ -55,6 +55,68 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Get Server",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3030/api/server/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3030",
+					"path": [
+						"api",
+						"server",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Databases",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3030/api/databases",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3030",
+					"path": [
+						"api",
+						"databases"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Database",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3030/api/database/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3030",
+					"path": [
+						"api",
+						"database",
+						"1"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

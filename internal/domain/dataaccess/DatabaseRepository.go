@@ -9,7 +9,7 @@ import (
 
 type DatabaseRepository interface {
 	AddDatabase(database entities.Database) (int64, error)
-	GetDatabaseById(id int64) (entities.Database, error)
+	GetDatabaseById(id int64) (*entities.Database, error)
 	GetDatabaseByName(name string) (*entities.Database, error)
 	GetDatabases() ([]entities.Database, error)
 }
@@ -36,16 +36,16 @@ func (r MySqlDatabaseRepository) AddDatabase(database entities.Database) (int64,
 	return id, nil
 }
 
-func (r MySqlDatabaseRepository) GetDatabaseById(id int64) (entities.Database, error) {
+func (r MySqlDatabaseRepository) GetDatabaseById(id int64) (*entities.Database, error) {
 	row := db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE id=?", id)
 
 	var d entities.Database
 	err := row.Scan(&d.Id, &d.Name, &d.Server)
 	if err != nil {
-		return d, err
+		return &d, err
 	}
 
-	return d, nil
+	return &d, nil
 }
 
 func (r MySqlDatabaseRepository) GetDatabaseByName(name string) (*entities.Database, error) {

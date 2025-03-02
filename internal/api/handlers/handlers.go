@@ -106,6 +106,32 @@ func HandleDatabases(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepo
 	}
 }
 
+func HandleDatabaseDetails(sr dataaccess.DatabaseRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+		log.Printf("Attempting to get database %d\n", id)
+		if err != nil {
+			log.Println(err)
+			handleError(w, http.StatusBadRequest, err.Error(), nil)
+			return
+		}
+
+		database, err := sr.GetDatabaseById(id)
+		if err != nil {
+			log.Println(err)
+			handleError(w, http.StatusInternalServerError, err.Error(), nil)
+			return
+		}
+
+		if database == nil {
+			notFound(w)
+			return
+		}
+
+		returnJson(w, mapping.MapDatabase(*database))
+	}
+}
+
 func notFound(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotFound)
 }

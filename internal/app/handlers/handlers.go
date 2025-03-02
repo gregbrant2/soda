@@ -55,7 +55,7 @@ func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository, sr dataaccess.Serv
 		}
 
 		renderTemplate(w, "database-details", viewmodels.DatabaseDetails{
-			Database: db,
+			Database: *db,
 			Server:   *server,
 		})
 	}
