@@ -1,7 +1,9 @@
 package validation
 
 import (
+	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
@@ -11,6 +13,7 @@ import (
 func ValidateServerNew(r dataaccess.ServerRepository, server entities.Server) (bool, map[string]string) {
 	var errors = make(map[string]string)
 	var namePattern = regexp.MustCompile(`\w`)
+	var serverTypes = []string{"mysql", "postgres", "mssql"}
 	var ipPattern = regexp.MustCompile(`\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}`)
 	var portPattern = regexp.MustCompile(`\d+`)
 
@@ -33,9 +36,9 @@ func ValidateServerNew(r dataaccess.ServerRepository, server entities.Server) (b
 		errors["Type"] = "Please enter a server type"
 	}
 
-	match = namePattern.MatchString(server.Type)
+	match = slices.Contains(serverTypes, server.Type)
 	if !match {
-		errors["Type"] = "Please enter a valid server type"
+		errors["Type"] = fmt.Sprintf("Please enter a valid server type. Valid types are %s", strings.Join(serverTypes, `, `))
 	}
 
 	match = ipPattern.MatchString(server.IpAddress)

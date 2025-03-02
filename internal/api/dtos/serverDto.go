@@ -9,3 +9,12 @@ type Server struct {
 	Port      string
 	Status    string
 }
+
+type NewServer struct {
+	Name      string
+	Type      string
+	IpAddress string
+	Port      string
+	Username  string
+	Password  string
+}

@@ -15,10 +15,10 @@ func RegisterRoutes(
 
 	routing.BindRoute(mux, "/api/servers", handlers.HandleServers(dbr, sr))
 	routing.BindRoute(mux, "/api/server/{id}", handlers.HandleServerDetails(sr))
-	routing.BindRoute(mux, "/api/server/new", emptyHandler())
+	routing.BindRoute(mux, "/api/server", handlers.HandleServerNew(sr))
 	routing.BindRoute(mux, "/api/databases", emptyHandler())
 	routing.BindRoute(mux, "/api/database/{id}", emptyHandler())
-	routing.BindRoute(mux, "/api/database/new", emptyHandler())
+	routing.BindRoute(mux, "/api/database", emptyHandler())
 }
 
 func emptyHandler() http.HandlerFunc {

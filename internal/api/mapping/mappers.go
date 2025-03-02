@@ -21,3 +21,14 @@ func MapServer(entity entities.Server) dtos.Server {
 		Status:    entity.Status,
 	}
 }
+
+func MapNewServer(dto dtos.NewServer) entities.Server {
+	return entities.Server{
+		Name:      dto.Name,
+		Type:      dto.Type,
+		IpAddress: dto.IpAddress,
+		Port:      dto.Port,
+		Username:  dto.Username,
+		Password:  dto.Password,
+	}
+}
