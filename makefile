@@ -1,7 +1,7 @@
 
 .PHONY : soda-dev
 soda-dev:
-	cd cmd/soda; air
+	air
 
 .PHONY : soda-test
 soda-test:
