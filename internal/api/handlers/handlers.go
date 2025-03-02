@@ -90,6 +90,22 @@ func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 	}
 }
 
+func HandleDatabases(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		databases, err := dbr.GetDatabases()
+		if err != nil {
+			log.Println(err)
+			handleError(w, http.StatusInternalServerError, err.Error(), nil)
+		}
+
+		if databases == nil {
+			notFound(w)
+		}
+
+		returnJson(w, mapping.MapDatabases(databases))
+	}
+}
+
 func notFound(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotFound)
 }

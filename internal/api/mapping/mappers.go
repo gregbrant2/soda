@@ -32,3 +32,14 @@ func MapNewServer(dto dtos.NewServer) entities.Server {
 		Password:  dto.Password,
 	}
 }
+func MapDatabases(servers []entities.Database) []dtos.Database {
+	return utils.Map(servers, func(s entities.Database) dtos.Database { return MapDatabase(s) })
+}
+
+func MapDatabase(entity entities.Database) dtos.Database {
+	return dtos.Database{
+		Id:     entity.Id,
+		Name:   entity.Name,
+		Server: entity.Server,
+	}
+}
