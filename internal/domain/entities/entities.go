@@ -6,7 +6,7 @@ type Server struct {
 	Type      string
 	Databases int
 	IpAddress string
-	Port      string
+	Port      string `fake:"{number:1024,49151}"`
 	Status    string
 	Username  string
 	Password  string

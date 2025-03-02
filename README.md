@@ -25,6 +25,7 @@ an API that can be used from a terraform provider and the like.
     - [x] New Server
     - [x] New Database
     - [x] Unit tests
+- [ ] API
 - [ ] Sanitize queries
 - [ ] Transactions around create database operations
 - [ ] Git versioning
@@ -32,7 +33,7 @@ an API that can be used from a terraform provider and the like.
     - [ ] Probably need to fix path issues with templates and static files, so can be run outside of Air.
 - [ ] User documentation
 - [ ] Error handling (better than `log.Fatal`)
-- [ ] API
+
 - [ ] Server password encryption
 - [ ] Authn/Authz
     - [ ] Users

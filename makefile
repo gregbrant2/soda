@@ -5,7 +5,9 @@ soda-dev:
 
 .PHONY : soda-test
 soda-test:
-	go test -v -cover ./...
+	# See this answer for configuring grc for `go test`
+	# https://stackoverflow.com/a/40160711/1741868
+	grc $(if $(shell command -v grc 2>/dev/null),go test) -v -cover ./...
 	
 .PHONY : start-soda-db
 start-soda-db:
