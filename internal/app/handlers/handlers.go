@@ -16,6 +16,7 @@ import (
 
 func HandleDashboard(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Handle Dashboard")
 		dbs, err := dbr.GetDatabases()
 		if err != nil {
 			log.Fatal(err)

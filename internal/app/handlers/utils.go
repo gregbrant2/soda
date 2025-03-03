@@ -10,10 +10,13 @@ import (
 )
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
-	log.Println(filepath.Abs("../../web/template"))
-	info, err := os.Stat("../../web/template")
+	p, err := filepath.Abs(".")
+	log.Printf("PWD: %s\n", p)
+	p, err = filepath.Abs("./web/template")
+	log.Printf("web/templates: %s", p)
+	info, err := os.Stat("./web/template")
 	log.Println(info.Name(), info.IsDir(), err)
-	tmpls := template.Must(template.ParseFiles("../../web/template/soda.tmpl", "../../web/template/"+name+".tmpl"))
+	tmpls := template.Must(template.ParseFiles("./web/template/soda.tmpl", "./web/template/"+name+".tmpl"))
 	err = tmpls.ExecuteTemplate(w, "soda.tmpl", data)
 
 	if err != nil {
