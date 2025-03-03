@@ -25,7 +25,7 @@ an API that can be used from a terraform provider and the like.
     - [x] New Server
     - [x] New Database
     - [x] Unit tests
-- [ ] API
+- [x] API
 - [ ] Sanitize queries
 - [ ] Transactions around create database operations
 - [ ] Git versioning
