@@ -13,7 +13,7 @@ func RegisterRoutes(
 	sr dataaccess.ServerRepository,
 	mux *http.ServeMux) {
 
-	fs := http.FileServer(http.Dir("../../web/static/"))
+	fs := http.FileServer(http.Dir("./web/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	routing.BindRoute(mux, "/", handlers.HandleDashboard(dbr, sr))

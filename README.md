@@ -26,14 +26,14 @@ an API that can be used from a terraform provider and the like.
     - [x] New Database
     - [x] Unit tests
 - [x] API
+- [x] Build docker container
+    - [x] Probably need to fix path issues with templates and static files, so can be run outside of Air.
+    - [x] Migrate system database on startup
+- [ ] Git versioning
 - [ ] Sanitize queries
 - [ ] Transactions around create database operations
-- [ ] Git versioning
-- [ ] Build docker container
-    - [ ] Probably need to fix path issues with templates and static files, so can be run outside of Air.
 - [ ] User documentation
 - [ ] Error handling (better than `log.Fatal`)
-
 - [ ] Server password encryption
 - [ ] Authn/Authz
     - [ ] Users

@@ -1,7 +1,7 @@
 
 .PHONY : soda-dev
 soda-dev:
-	air
+	SODA_SYSTEM_DB_USER=root SODA_SYSTEM_DB_PASSWORD=password SODA_SYSTEM_DB_ADDR='127.0.0.1:3306' SODA_SYSTEM_DB_NAME=soda air
 
 .PHONY : soda-test
 soda-test:
