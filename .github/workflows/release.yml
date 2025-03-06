@@ -13,8 +13,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: GitTools
-        uses: GitTools/actions@v3.1.11
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.1.11
+        with:
+          versionSpec: "6.0.x"
 
       - name: Determine Version
         id: version_step # step id used as reference for output values
