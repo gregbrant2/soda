@@ -15,11 +15,21 @@ the lab like I do.
 The plan is to implement a simple to deploy, simple to use web app, with 
 an API that can be used from a terraform provider and the like.
 
+## This is a learning project
+Soda is primarily a vehicle to allow me to learn Go, so priorities might seem
+wrong, such as passwords not being encrypted in the database. It's not that I 
+don't know that's bad, I'm just focussed on learning basic syntax and structure 
+for now and I'll go down that rabit hole when I get to it. Before then I want
+to get a good general knowledge of Go fundamentals.
+
+> [!CAUTION]
+> Soda is not production ready and is not meant to be
+> deployed anywhere of any importance.
 
 ## Development
+Below are some of the things I might get round to, in rough, but not definate order.
 
 ### To Do
-
 - [x] Create database on target server
 - [x] Form validation
     - [x] New Server
@@ -35,11 +45,16 @@ an API that can be used from a terraform provider and the like.
 - [ ] User documentation
 - [ ] Error handling (better than `log.Fatal`)
 - [ ] Server password encryption
+- [ ] Dependency injection
+- [ ] Migrate to one of the web frameworks
 - [ ] Authn/Authz
     - [ ] Users
     - [ ] Roles
     - [ ] Permissions
     - [ ] API Tokens
+- [ ] Server stats
+- [ ] Database stats
+- [ ] Support multiple databases / provider model
 - [ ] Row versioning (for change history / revert)
 
 ### Database Migrations
