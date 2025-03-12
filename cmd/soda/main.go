@@ -7,6 +7,7 @@ import (
 	"github.com/gregbrant2/soda/internal/api"
 	"github.com/gregbrant2/soda/internal/app"
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
+	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
 func main() {
@@ -18,6 +19,8 @@ func main() {
   ____) | (_) | (_| | (_| |
  |_____/ \___/ \__,_|\__,_|                           
                            `)
+
+	utils.InitLogging()
 
 	db := dataaccess.Initialize()
 	defer db.Close()

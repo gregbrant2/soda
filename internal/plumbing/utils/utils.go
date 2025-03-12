@@ -1,5 +1,10 @@
 package utils
 
+import (
+	"log"
+	"log/slog"
+)
+
 type MapFunc[T any, TMapped any] func(T) TMapped
 
 func Map[T any, TMapped any](items []T, f MapFunc[T, TMapped]) []TMapped {
@@ -9,4 +14,10 @@ func Map[T any, TMapped any](items []T, f MapFunc[T, TMapped]) []TMapped {
 	}
 
 	return mapped
+}
+
+func Fatal(msg string, err error, args ...any) {
+	newArgs := append([]any{ErrAttr(err)}, args...)
+	slog.Error(msg, newArgs...)
+	log.Fatal(msg)
 }

@@ -3,7 +3,7 @@ package dataaccess
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/gregbrant2/soda/internal/domain/entities"
 )
@@ -38,7 +38,7 @@ func (r MySqlServerRepository) AddServer(server entities.Server) (int64, error) 
 }
 
 func (r MySqlServerRepository) GetServers() ([]entities.Server, error) {
-	log.Println("Getting all servers")
+	slog.Debug("Getting all servers")
 	rows, err := db.Query("SELECT id, name, type, ip_address, port FROM soda_servers")
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (r MySqlServerRepository) GetServers() ([]entities.Server, error) {
 	}
 
 	if err = rows.Err(); err != nil {
-		log.Println(err)
+		slog.Error("Errror reading server rows", err)
 		return servers, err
 	}
 

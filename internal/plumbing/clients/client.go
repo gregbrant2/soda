@@ -3,9 +3,9 @@ package clients
 import (
 	"database/sql"
 	"errors"
-	"log"
 
 	"github.com/gregbrant2/soda/internal/domain/entities"
+	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
 type IDbClient interface {
@@ -31,7 +31,7 @@ func (dbc *DbClient) Ping() error {
 func (dbc *DbClient) Query(conn *sql.DB, query string) (sql.Result, error) {
 	r, err := conn.Exec(query)
 	if err != nil {
-		log.Fatal(err)
+		utils.Fatal("Error executing query", err, "query", query)
 	}
 
 	return r, nil

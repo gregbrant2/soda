@@ -2,25 +2,18 @@ package handlers
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
-	"os"
-	"path/filepath"
 	"text/template"
+
+	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
-	p, err := filepath.Abs(".")
-	log.Printf("PWD: %s\n", p)
-	p, err = filepath.Abs("./web/template")
-	log.Printf("web/templates: %s", p)
-	info, err := os.Stat("./web/template")
-	log.Println(info.Name(), info.IsDir(), err)
 	tmpls := template.Must(template.ParseFiles("./web/template/soda.tmpl", "./web/template/"+name+".tmpl"))
-	err = tmpls.ExecuteTemplate(w, "soda.tmpl", data)
-
+	err := tmpls.ExecuteTemplate(w, "soda.tmpl", data)
 	if err != nil {
-		log.Println(err)
+		slog.Error("Error executing template", utils.ErrAttr(err), "name", name)
 		http.Error(w, "Error rendering template", http.StatusInternalServerError)
 	}
 }

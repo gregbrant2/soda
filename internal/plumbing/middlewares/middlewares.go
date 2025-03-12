@@ -1,25 +1,33 @@
 package middlewares
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
 
 // Logging logs all requests with its path and the time it took to process
 func Logging() Middleware {
-
 	// Create a new Middleware
 	return func(f http.HandlerFunc) http.HandlerFunc {
-
 		// Define the http.HandlerFunc
 		return func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now()
+			requestId := uuid.New()
+			logger := slog.Default()
+			logger2 := slog.With("requestId", requestId)
+			slog.SetDefault(logger2)
 
-			log.Println(r.URL.Path, time.Since(start))
-			defer func() { log.Println(r.URL.Path, time.Since(start)) }()
+			start := time.Now()
+			slog.Info("Start request", "path", r.URL.Path, "start_time", start)
+			defer func() {
+				slog.Info("End request", "path", r.URL.Path, "duration", time.Since(start))
+				// reinstate the logger
+				slog.SetDefault(logger)
+			}()
 
 			// Call the next middleware/handler in chain
 			f(w, r)

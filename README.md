@@ -54,6 +54,12 @@ Below are some of the things I might get round to, in rough, but not definate or
     - [ ] Roles
     - [ ] Permissions
     - [ ] API Tokens
+- [ ] Server status
+  - [ ] Server list
+  - [ ] Server details
+  - [ ] Database list
+  - [ ] Database details
+  - [ ] API??
 - [ ] Server stats
 - [ ] Database stats
 - [ ] Support multiple databases / provider model

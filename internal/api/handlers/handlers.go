@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -10,13 +9,15 @@ import (
 	"github.com/gregbrant2/soda/internal/api/mapping"
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
 	"github.com/gregbrant2/soda/internal/domain/validation"
+	"github.com/gregbrant2/soda/internal/plumbing/utils"
+	"golang.org/x/exp/slog"
 )
 
 func HandleServers(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		servers, err := sr.GetServers()
 		if err != nil {
-			log.Println(err)
+			slog.Error("Error getting servers", utils.ErrAttr(err))
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
 		}
 
@@ -30,18 +31,19 @@ func HandleServers(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerReposi
 
 func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Debug("Getting server details")
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 		if err != nil {
-			log.Println(err)
+			slog.Error("Error getting Id", "id", id, utils.ErrAttr(err))
 			handleError(w, http.StatusBadRequest, err.Error(), nil)
 			return
 		}
 
-		log.Println(id, "details")
+		slog.Info("Getting server details for", "id", id)
 
 		server, err := sr.GetServerById(id)
 		if err != nil {
-			log.Println(err)
+			slog.Error("Error getting server from repository", "id", id, err)
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
 			return
 		}
@@ -57,14 +59,12 @@ func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
 
 func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Attempting to create new server")
+		slog.Debug("Attempting to create new server")
 		var payload dtos.NewServer
 		err := json.NewDecoder(r.Body).Decode(&payload)
 
-		// id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 		if err != nil {
-			log.Println("Error decoding JSON request")
-			log.Println(err)
+			slog.Error("Error decoding JSON request", utils.ErrAttr(err))
 			handleError(w, http.StatusBadRequest, err.Error(), nil)
 			return
 		}
@@ -72,7 +72,7 @@ func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 		server := mapping.MapNewServer(payload)
 		valid, errors := validation.ValidateServerNew(sr, server)
 		if !valid {
-			log.Println("Validation errors were encountered", errors)
+			slog.Debug("Validation errors were encountered", "errors", errors)
 			handleError(w, http.StatusBadRequest, "Invalid payload", errors)
 			return
 		}
@@ -92,13 +92,15 @@ func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 
 func HandleDatabases(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Debug("Getting databases")
 		databases, err := dbr.GetDatabases()
 		if err != nil {
-			log.Println(err)
+			slog.Error("Error getting databases", utils.ErrAttr(err))
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		if databases == nil {
+			slog.Debug("Datanases was nil")
 			notFound(w)
 		}
 
@@ -108,17 +110,18 @@ func HandleDatabases(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepo
 
 func HandleDatabaseDetails(sr dataaccess.DatabaseRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Debug("Getting database details")
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
-		log.Printf("Attempting to get database %d\n", id)
+		slog.Info("Attempting to get database", "id", id)
 		if err != nil {
-			log.Println(err)
+			slog.Error("Error getting database", utils.ErrAttr(err))
 			handleError(w, http.StatusBadRequest, err.Error(), nil)
 			return
 		}
 
 		database, err := sr.GetDatabaseById(id)
 		if err != nil {
-			log.Println(err)
+			slog.Error("Error getting database", "id", id, utils.ErrAttr(err))
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
 			return
 		}
@@ -134,13 +137,12 @@ func HandleDatabaseDetails(sr dataaccess.DatabaseRepository) http.HandlerFunc {
 
 func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Attempting to create new database")
+		slog.Debug("Attempting to create new database")
 		var payload dtos.NewDatabase
 		err := json.NewDecoder(r.Body).Decode(&payload)
 
 		if err != nil {
-			log.Println("Error decoding JSON request")
-			log.Println(err)
+			slog.Error("Error decoding JSON request", utils.ErrAttr(err))
 			handleError(w, http.StatusBadRequest, err.Error(), nil)
 			return
 		}
@@ -148,7 +150,7 @@ func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRe
 		database := mapping.MapNewDatabase(payload)
 		valid, errors := validation.ValidateDatabaseNew(dbr, sr, database)
 		if !valid {
-			log.Println("Validation errors were encountered", errors)
+			slog.Debug("Validation errors were encountered", "errors", errors)
 			handleError(w, http.StatusBadRequest, "Invalid payload", errors)
 			return
 		}

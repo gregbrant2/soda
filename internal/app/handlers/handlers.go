@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -12,19 +13,20 @@ import (
 	"github.com/gregbrant2/soda/internal/domain/entities"
 	"github.com/gregbrant2/soda/internal/domain/validation"
 	"github.com/gregbrant2/soda/internal/plumbing/clients"
+	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
 func HandleDashboard(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Handle Dashboard")
+		slog.Debug("Handle Dashboard")
 		dbs, err := dbr.GetDatabases()
 		if err != nil {
-			log.Fatal(err)
+			utils.Fatal("Error getting databases", err)
 		}
 
 		servers, err := sr.GetServers()
 		if err != nil {
-			log.Fatal(err)
+			utils.Fatal("Error getting servers", err)
 		}
 
 		renderTemplate(w, "dashboard", viewmodels.Dashboard{
@@ -36,23 +38,23 @@ func HandleDashboard(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepo
 
 func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Debug("Getting database details")
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 		if err != nil {
-			log.Println(err)
+			slog.Error("Error parsing Id from query", utils.ErrAttr(err))
 			errorHandler(w, r, http.StatusBadRequest)
 			return
 		}
 
-		log.Println(id, "details")
-
+		slog.Info("Database details", "id", id)
 		db, err := dbr.GetDatabaseById(id)
 		if err != nil {
-			log.Fatal("Error getting db by id", id, err)
+			utils.Fatal("Error getting db by id", err, "id", id)
 		}
 
 		server, err := sr.GetServerByName(db.Server)
 		if err != nil {
-			log.Fatal("Error getting server for db", db, err)
+			utils.Fatal("Error getting server for db", err, "db", db)
 		}
 
 		renderTemplate(w, "database-details", viewmodels.DatabaseDetails{
@@ -64,9 +66,10 @@ func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository, sr dataaccess.Serv
 
 func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Debug("New database")
 		servers, err := sr.GetServers()
 		if err != nil {
-			log.Fatal(err)
+			utils.Fatal("Error getting servers", err)
 		}
 
 		var selectedServer entities.Server
@@ -75,7 +78,7 @@ func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRe
 		if len(selectedServerQuery) > 0 {
 			selectedServerId, err = strconv.ParseInt(selectedServerQuery, 10, 64)
 			if err != nil {
-				log.Fatal(err)
+				utils.Fatal("Error parsing selected server", err, "query", selectedServerQuery)
 			}
 
 			selectedServer = servers[pie.FindFirstUsing(servers, func(s entities.Server) bool { return s.Id == selectedServerId })]
@@ -94,39 +97,43 @@ func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRe
 				Server: r.PostFormValue("server"),
 			}
 
-			log.Println("Adding database", database)
-
+			slog.Debug("Adding database")
 			valid, errors := validation.ValidateDatabaseNew(dbr, sr, database)
-
 			if !valid {
 				vm.Errors = errors
 				vm.Database = database
+				slog.Debug("Returning validation errors", "errors", errors)
 				handleDatabaseNewView(w, r, servers, vm)
 				return
 			}
 
 			server, err := sr.GetServerByName(database.Server)
 			if err != nil {
-				log.Fatal(err)
+				utils.Fatal("Error getting target server", err)
 			}
 
 			id, err := dbr.AddDatabase(database)
 			if err != nil {
-				log.Fatal(err)
+				utils.Fatal("Error adding database", err)
 			}
 
 			c, err := clients.CreateServer(*server)
+			if err != nil {
+				utils.Fatal("", err)
+			}
+
 			err = c.CreateDatabase(*server, database.Name)
 			if err != nil {
-				log.Fatal(err)
+				utils.Fatal("Error creating database on target server", err)
 			}
 
+			// TODO: Implement password
 			err = c.CreateUser(*server, database.Name, database.Name, database.Name)
 			if err != nil {
-				log.Fatal(err)
+				utils.Fatal("Error creating user on target server", err)
 			}
 
-			http.Redirect(w, r, "/databases/"+strconv.FormatInt(int64(id), 10), http.StatusSeeOther)
+			http.Redirect(w, r, fmt.Sprintf("/databases/%d", id), http.StatusSeeOther)
 		}
 
 		handleDatabaseNewView(w, r, servers, vm)
@@ -147,18 +154,18 @@ func handleDatabaseNewView(w http.ResponseWriter, r *http.Request, servers []ent
 
 func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Debug("Getting server details")
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 		if err != nil {
-			log.Println(err)
+			slog.Error("Error getting Id from query", utils.ErrAttr(err))
 			errorHandler(w, r, http.StatusBadRequest)
 			return
 		}
 
-		log.Println(id, "details")
-
+		slog.Info("Server details for", "id", id)
 		server, err := sr.GetServerById(id)
 		if err != nil {
-			log.Fatal(err)
+			utils.Fatal("Error getting server", err, "id", id)
 		}
 
 		renderTemplate(w, "server-details", entities.Server{
@@ -177,10 +184,12 @@ func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
 
 func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Debug("Creating new server")
+
 		vm := viewmodels.NewServer{}
 
 		if r.Method == http.MethodPost {
-			log.Println("Adding server")
+			slog.Info("Adding server")
 			server := entities.Server{
 				Name:      r.PostFormValue("name"),
 				IpAddress: r.PostFormValue("ipAddress"),
@@ -190,8 +199,7 @@ func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 				Password:  r.PostFormValue("password"),
 			}
 
-			log.Println("Saving", server)
-
+			slog.Debug("Saving", "server", server.Name)
 			valid, errors := validation.ValidateServerNew(sr, server)
 			if !valid {
 				vm.Errors = errors
@@ -202,10 +210,10 @@ func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 
 			id, err := sr.AddServer(server)
 			if err != nil {
-				log.Fatal("Adding server:", err)
+				utils.Fatal("Adding server:", err)
 			}
 
-			log.Println("Done adding server")
+			slog.Debug("Done adding server")
 			http.Redirect(w, r, "/servers/"+strconv.FormatInt(int64(id), 10), http.StatusSeeOther)
 		}
 

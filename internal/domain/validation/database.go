@@ -2,7 +2,7 @@ package validation
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"regexp"
 	"strings"
 
@@ -28,8 +28,7 @@ func ValidateDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.Server
 	} else {
 		server, err := sr.GetServerByName(database.Server)
 		if err != nil {
-			log.Println("Error fetching server")
-			log.Println(err)
+			slog.Error("Error fetching server", err)
 		}
 
 		if server != nil {
