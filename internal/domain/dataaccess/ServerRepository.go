@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/gregbrant2/soda/internal/domain/entities"
+	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
 type ServerRepository interface {
@@ -54,7 +55,7 @@ func (r MySqlServerRepository) GetServers() ([]entities.Server, error) {
 	}
 
 	if err = rows.Err(); err != nil {
-		slog.Error("Errror reading server rows", err)
+		slog.Error("Errror reading server rows", utils.ErrAttr(err))
 		return servers, err
 	}
 

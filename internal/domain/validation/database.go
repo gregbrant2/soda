@@ -8,6 +8,7 @@ import (
 
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
 	"github.com/gregbrant2/soda/internal/domain/entities"
+	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
 func ValidateDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository, database entities.Database) (bool, map[string]string) {
@@ -28,7 +29,7 @@ func ValidateDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.Server
 	} else {
 		server, err := sr.GetServerByName(database.Server)
 		if err != nil {
-			slog.Error("Error fetching server", err)
+			slog.Error("Error fetching server", utils.ErrAttr(err))
 		}
 
 		if server != nil {
