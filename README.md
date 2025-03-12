@@ -42,13 +42,15 @@ Below are some of the things I might get round to, in rough, but not definate or
 - [ ] Git versioning
   - [x] Docker container
   - [ ] Application binary
+- [x] Upgrade logging
 - [ ] Sanitize queries
 - [ ] Transactions around create database operations
 - [ ] User documentation
-- [ ] Error handling (better than `log.Fatal`)
+- [x] Error handling (better than `log.Fatal`)
 - [ ] Server password encryption
 - [ ] Dependency injection
 - [ ] Migrate to one of the web frameworks
+- [ ] Support commandline args for logging to file
 - [ ] Authn/Authz
     - [ ] Users
     - [ ] Roles

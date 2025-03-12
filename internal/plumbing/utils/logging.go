@@ -9,11 +9,11 @@ import (
 
 func InitLogging() {
 	stderr := os.Stderr
-	fileLog := OpenCreate("soda.log")
+	// fileLog := OpenCreate("soda.log")
 
 	logger := slog.New(
 		slogmulti.Fanout(
-			slog.NewJSONHandler(fileLog, &slog.HandlerOptions{}),
+			// slog.NewJSONHandler(fileLog, &slog.HandlerOptions{}),
 			slog.NewTextHandler(stderr, &slog.HandlerOptions{}),
 			// ...
 		),
