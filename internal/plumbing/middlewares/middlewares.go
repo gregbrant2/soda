@@ -17,16 +17,18 @@ func Logging() Middleware {
 		// Define the http.HandlerFunc
 		return func(w http.ResponseWriter, r *http.Request) {
 			requestId := uuid.New()
-			logger := slog.Default()
-			logger2 := slog.With("requestId", requestId)
-			slog.SetDefault(logger2)
+
+			originalLogger := slog.Default()
+			requestLogger := slog.With("requestId", requestId)
+			slog.SetDefault(requestLogger)
 
 			start := time.Now()
 			slog.Info("Start request", "path", r.URL.Path, "start_time", start)
+
 			defer func() {
 				slog.Info("End request", "path", r.URL.Path, "duration", time.Since(start))
 				// reinstate the logger
-				slog.SetDefault(logger)
+				slog.SetDefault(originalLogger)
 			}()
 
 			// Call the next middleware/handler in chain
