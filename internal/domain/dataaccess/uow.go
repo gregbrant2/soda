@@ -8,9 +8,9 @@ type UnitOfWork struct {
 	Servers ServerRepository
 }
 
-func NewUow() UnitOfWork {
+func NewUow() (UnitOfWork, func()) {
 	db := Initialize()
-	defer db.Close()
+	deferral := func() { db.Close() }
 
 	dbr := NewMySqlDatabaseRepository(db)
 	sr := NewMySqlServerRepository(db)
@@ -19,7 +19,7 @@ func NewUow() UnitOfWork {
 		db:      db,
 		DBs:     dbr,
 		Servers: sr,
-	}
+	}, deferral
 }
 
 func (u *UnitOfWork) BeginTran() (*sql.Tx, error) {

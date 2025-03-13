@@ -21,7 +21,9 @@ func main() {
                            `)
 
 	utils.InitLogging()
-	uow := dataaccess.NewUow()
+	uow, close := dataaccess.NewUow()
+	defer close()
+
 	mux := http.NewServeMux()
 	app.RegisterRoutes(uow, mux)
 	api.RegisterRoutes(uow, mux)
