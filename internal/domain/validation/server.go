@@ -10,7 +10,7 @@ import (
 	"github.com/gregbrant2/soda/internal/domain/entities"
 )
 
-func ValidateServerNew(r dataaccess.ServerRepository, server entities.Server) (bool, map[string]string) {
+func ValidateServerNew(uow dataaccess.UnitOfWork, server entities.Server) (bool, map[string]string) {
 	var errors = make(map[string]string)
 	var namePattern = regexp.MustCompile(`\w`)
 	var serverTypes = []string{"mysql", "postgres", "mssql"}
@@ -26,7 +26,7 @@ func ValidateServerNew(r dataaccess.ServerRepository, server entities.Server) (b
 		errors["Name"] = "Please enter a valid server name"
 	}
 
-	existing, _ := r.GetServerByName(server.Name)
+	existing, _ := uow.Servers.GetServerByName(server.Name)
 
 	if existing != nil {
 		errors["Name"] = "A server with this name already exists"

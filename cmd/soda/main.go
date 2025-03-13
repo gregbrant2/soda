@@ -21,16 +21,10 @@ func main() {
                            `)
 
 	utils.InitLogging()
-
-	db := dataaccess.Initialize()
-	defer db.Close()
-
-	dbr := dataaccess.NewMySqlDatabaseRepository(db)
-	sr := dataaccess.NewMySqlServerRepository(db)
-
+	uow := dataaccess.NewUow()
 	mux := http.NewServeMux()
-	app.RegisterRoutes(dbr, sr, mux)
-	api.RegisterRoutes(dbr, sr, mux)
+	app.RegisterRoutes(uow, mux)
+	api.RegisterRoutes(uow, mux)
 
 	err := http.ListenAndServe(":3030", mux)
 	if err != nil {

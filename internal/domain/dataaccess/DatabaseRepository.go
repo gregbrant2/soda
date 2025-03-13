@@ -23,7 +23,7 @@ func NewMySqlDatabaseRepository(db *sql.DB) *MySqlDatabaseRepository {
 }
 
 func (r MySqlDatabaseRepository) AddDatabase(database entities.Database) (int64, error) {
-	res, err := db.Exec("INSERT INTO soda_databases (name, server_name) VALUES (?, ?)", database.Name, database.Server)
+	res, err := r.db.Exec("INSERT INTO soda_databases (name, server_name) VALUES (?, ?)", database.Name, database.Server)
 	if err != nil {
 		return 0, fmt.Errorf("addDatabase: %v", err)
 	}
@@ -37,7 +37,7 @@ func (r MySqlDatabaseRepository) AddDatabase(database entities.Database) (int64,
 }
 
 func (r MySqlDatabaseRepository) GetDatabaseById(id int64) (*entities.Database, error) {
-	row := db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE id=?", id)
+	row := r.db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE id=?", id)
 
 	var d entities.Database
 	err := row.Scan(&d.Id, &d.Name, &d.Server)
@@ -49,7 +49,7 @@ func (r MySqlDatabaseRepository) GetDatabaseById(id int64) (*entities.Database, 
 }
 
 func (r MySqlDatabaseRepository) GetDatabaseByName(name string) (*entities.Database, error) {
-	row := db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE name=?", name)
+	row := r.db.QueryRow("SELECT id, name, server_name FROM soda_databases WHERE name=?", name)
 
 	var db entities.Database
 	err := row.Scan(&db.Id, &db.Name, &db.Server)
@@ -61,7 +61,7 @@ func (r MySqlDatabaseRepository) GetDatabaseByName(name string) (*entities.Datab
 }
 
 func (r MySqlDatabaseRepository) GetDatabases() ([]entities.Database, error) {
-	rows, err := db.Query("SELECT id, name, server_name FROM soda_databases")
+	rows, err := r.db.Query("SELECT id, name, server_name FROM soda_databases")
 	if err != nil {
 		return nil, err
 	}

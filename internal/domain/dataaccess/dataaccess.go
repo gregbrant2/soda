@@ -9,8 +9,6 @@ import (
 	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
-var db *sql.DB
-
 func Initialize() *sql.DB {
 	slog.Info("Initializing System Database")
 	cfg := mysql.Config{
@@ -23,8 +21,7 @@ func Initialize() *sql.DB {
 
 	slog.Info("Connecting to system database", "address", cfg.Addr, "database", cfg.DBName, "user", cfg.User)
 
-	var err error
-	db, err = sql.Open("mysql", cfg.FormatDSN())
+	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		utils.Fatal("Connection to system database failed:", err)
 	}

@@ -16,7 +16,7 @@ import (
 	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
-func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleDatabaseDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Getting database details")
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
@@ -27,12 +27,12 @@ func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository, sr dataaccess.Serv
 		}
 
 		slog.Info("Database details", "id", id)
-		db, err := dbr.GetDatabaseById(id)
+		db, err := uow.DBs.GetDatabaseById(id)
 		if err != nil {
 			utils.Fatal("Error getting db by id", err, "id", id)
 		}
 
-		server, err := sr.GetServerByName(db.Server)
+		server, err := uow.Servers.GetServerByName(db.Server)
 		if err != nil {
 			utils.Fatal("Error getting server for db", err, "db", db)
 		}
@@ -44,10 +44,10 @@ func HandleDatabaseDetails(dbr dataaccess.DatabaseRepository, sr dataaccess.Serv
 	}
 }
 
-func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleDatabaseNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("New database")
-		servers, err := sr.GetServers()
+		servers, err := uow.Servers.GetServers()
 		if err != nil {
 			utils.Fatal("Error getting servers", err)
 		}
@@ -78,7 +78,7 @@ func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRe
 			}
 
 			slog.Debug("Adding database")
-			valid, errors := validation.ValidateDatabaseNew(dbr, sr, database)
+			valid, errors := validation.ValidateDatabaseNew(uow, database)
 			if !valid {
 				vm.Errors = errors
 				vm.Database = database
@@ -87,12 +87,12 @@ func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRe
 				return
 			}
 
-			server, err := sr.GetServerByName(database.Server)
+			server, err := uow.Servers.GetServerByName(database.Server)
 			if err != nil {
 				utils.Fatal("Error getting target server", err)
 			}
 
-			id, err := dbr.AddDatabase(database)
+			id, err := uow.DBs.AddDatabase(database)
 			if err != nil {
 				utils.Fatal("Error adding database", err)
 			}

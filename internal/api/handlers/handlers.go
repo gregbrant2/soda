@@ -13,9 +13,9 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func HandleServers(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleServers(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		servers, err := sr.GetServers()
+		servers, err := uow.Servers.GetServers()
 		if err != nil {
 			slog.Error("Error getting servers", utils.ErrAttr(err))
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
@@ -29,7 +29,7 @@ func HandleServers(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerReposi
 	}
 }
 
-func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleServerDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Getting server details")
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
@@ -41,7 +41,7 @@ func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
 
 		slog.Info("Getting server details for", "id", id)
 
-		server, err := sr.GetServerById(id)
+		server, err := uow.Servers.GetServerById(id)
 		if err != nil {
 			slog.Error("Error getting server from repository", "id", id, err)
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
@@ -57,7 +57,7 @@ func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
 	}
 }
 
-func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleServerNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Attempting to create new server")
 		var payload dtos.NewServer
@@ -70,14 +70,14 @@ func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 		}
 
 		server := mapping.MapNewServer(payload)
-		valid, errors := validation.ValidateServerNew(sr, server)
+		valid, errors := validation.ValidateServerNew(uow, server)
 		if !valid {
 			slog.Debug("Validation errors were encountered", "errors", errors)
 			handleError(w, http.StatusBadRequest, "Invalid payload", errors)
 			return
 		}
 
-		serverId, err := sr.AddServer(server)
+		serverId, err := uow.Servers.AddServer(server)
 		if err != nil {
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
 			return
@@ -90,10 +90,10 @@ func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 	}
 }
 
-func HandleDatabases(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleDatabases(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Getting databases")
-		databases, err := dbr.GetDatabases()
+		databases, err := uow.DBs.GetDatabases()
 		if err != nil {
 			slog.Error("Error getting databases", utils.ErrAttr(err))
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
@@ -108,7 +108,7 @@ func HandleDatabases(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepo
 	}
 }
 
-func HandleDatabaseDetails(sr dataaccess.DatabaseRepository) http.HandlerFunc {
+func HandleDatabaseDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Getting database details")
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
@@ -119,7 +119,7 @@ func HandleDatabaseDetails(sr dataaccess.DatabaseRepository) http.HandlerFunc {
 			return
 		}
 
-		database, err := sr.GetDatabaseById(id)
+		database, err := uow.DBs.GetDatabaseById(id)
 		if err != nil {
 			slog.Error("Error getting database", "id", id, utils.ErrAttr(err))
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
@@ -135,7 +135,7 @@ func HandleDatabaseDetails(sr dataaccess.DatabaseRepository) http.HandlerFunc {
 	}
 }
 
-func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleDatabaseNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Attempting to create new database")
 		var payload dtos.NewDatabase
@@ -148,14 +148,14 @@ func HandleDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRe
 		}
 
 		database := mapping.MapNewDatabase(payload)
-		valid, errors := validation.ValidateDatabaseNew(dbr, sr, database)
+		valid, errors := validation.ValidateDatabaseNew(uow, database)
 		if !valid {
 			slog.Debug("Validation errors were encountered", "errors", errors)
 			handleError(w, http.StatusBadRequest, "Invalid payload", errors)
 			return
 		}
 
-		dbId, err := dbr.AddDatabase(database)
+		dbId, err := uow.DBs.AddDatabase(database)
 		if err != nil {
 			handleError(w, http.StatusInternalServerError, err.Error(), nil)
 			return

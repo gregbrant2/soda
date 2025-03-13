@@ -9,15 +9,15 @@ import (
 	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
-func HandleDashboard(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleDashboard(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Handle Dashboard")
-		dbs, err := dbr.GetDatabases()
+		dbs, err := uow.DBs.GetDatabases()
 		if err != nil {
 			utils.Fatal("Error getting databases", err)
 		}
 
-		servers, err := sr.GetServers()
+		servers, err := uow.Servers.GetServers()
 		if err != nil {
 			utils.Fatal("Error getting servers", err)
 		}

@@ -3,6 +3,7 @@ package validation
 import (
 	"testing"
 
+	"github.com/gregbrant2/soda/internal/domain/dataaccess"
 	"github.com/gregbrant2/soda/internal/domain/entities"
 	"github.com/stretchr/testify/assert"
 )
@@ -43,8 +44,8 @@ func (r *FakeDatabaseRepository) GetDatabases() ([]entities.Database, error) {
 }
 
 func TestValidateDatabaseNewSuccess(t *testing.T) {
-	dbr := &FakeDatabaseRepository{}
-	sr := &FakeServerRepository{}
+	uow, _, sr := fakeDataAccess()
+
 	sr.getServerByNameResult = ValidServer()
 
 	database := entities.Database{
@@ -52,61 +53,66 @@ func TestValidateDatabaseNewSuccess(t *testing.T) {
 		Server: "Bar",
 	}
 
-	valid, errors := ValidateDatabaseNew(dbr, sr, database)
+	valid, errors := ValidateDatabaseNew(uow, database)
 	assert.True(t, valid)
 	assert.Len(t, errors, 0)
 }
 
 func TestValidateDatabaseNewEmptyErrors(t *testing.T) {
-	r := &FakeDatabaseRepository{}
-	sr := &FakeServerRepository{}
+	uow, _, _ := fakeDataAccess()
 
 	database := entities.Database{}
 
-	valid, errors := ValidateDatabaseNew(r, sr, database)
+	valid, errors := ValidateDatabaseNew(uow, database)
 	if valid || len(errors) < 1 {
 		t.Fatal("Database should have been invalid", errors)
 	}
 }
 
 func TestValidateDatabaseNewExistingNameErrors(t *testing.T) {
-	dbr := &FakeDatabaseRepository{
-		getDatabaseByNameResult: &entities.Database{
-			Name:   "Name1",
-			Server: "Server1",
-		},
+	uow, dbr, _ := fakeDataAccess()
+	dbr.getDatabaseByNameResult = &entities.Database{
+		Name:   "Name1",
+		Server: "Server1",
 	}
-	sr := FakeServerRepository{}
 
 	database := entities.Database{
 		Name:   "Name1",
 		Server: "Server1",
 	}
 
-	valid, errors := ValidateDatabaseNew(dbr, sr, database)
+	valid, errors := ValidateDatabaseNew(uow, database)
 	if valid || len(errors) < 1 {
 		t.Fatal("Database should have been invalid due to name clash")
 	}
 }
 
 func TestValidateDatabaseNewExistingNameDifferentServerValid(t *testing.T) {
-	dbr := &FakeDatabaseRepository{
-		getDatabaseByNameResult: &entities.Database{
-			Name:   "Name1",
-			Server: "Server1",
-		},
+	uow, dbr, sr := fakeDataAccess()
+	dbr.getDatabaseByNameResult = &entities.Database{
+		Name:   "Name1",
+		Server: "Server1",
 	}
-	sr := FakeServerRepository{
-		getServerByNameResult: ValidServer(),
-	}
+	sr.getServerByNameResult = ValidServer()
 
 	database := entities.Database{
 		Name:   "Name1",
 		Server: "Server2",
 	}
 
-	valid, errors := ValidateDatabaseNew(dbr, sr, database)
+	valid, errors := ValidateDatabaseNew(uow, database)
 
 	assert.True(t, valid, "Database should have been valid due to different sever name")
 	assert.Len(t, errors, 0)
+}
+
+func fakeDataAccess() (dataaccess.UnitOfWork, *FakeDatabaseRepository, *FakeServerRepository) {
+	dbr := &FakeDatabaseRepository{}
+	sr := &FakeServerRepository{}
+	uow := dataaccess.UnitOfWork{
+		DBs:     dbr,
+		Servers: sr,
+	}
+
+	return uow, dbr, sr
 }

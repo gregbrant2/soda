@@ -12,7 +12,7 @@ import (
 	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
-func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleServerDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Getting server details")
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
@@ -23,7 +23,7 @@ func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
 		}
 
 		slog.Info("Server details for", "id", id)
-		server, err := sr.GetServerById(id)
+		server, err := uow.Servers.GetServerById(id)
 		if err != nil {
 			utils.Fatal("Error getting server", err, "id", id)
 		}
@@ -42,7 +42,7 @@ func HandleServerDetails(sr dataaccess.ServerRepository) http.HandlerFunc {
 	}
 }
 
-func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
+func HandleServerNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Creating new server")
 
@@ -60,7 +60,7 @@ func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 			}
 
 			slog.Debug("Saving", "server", server.Name)
-			valid, errors := validation.ValidateServerNew(sr, server)
+			valid, errors := validation.ValidateServerNew(uow, server)
 			if !valid {
 				vm.Errors = errors
 				vm.Server = &server
@@ -68,7 +68,7 @@ func HandleServerNew(sr dataaccess.ServerRepository) http.HandlerFunc {
 				return
 			}
 
-			id, err := sr.AddServer(server)
+			id, err := uow.Servers.AddServer(server)
 			if err != nil {
 				utils.Fatal("Adding server:", err)
 			}

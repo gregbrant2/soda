@@ -9,16 +9,15 @@ import (
 )
 
 func RegisterRoutes(
-	dbr dataaccess.DatabaseRepository,
-	sr dataaccess.ServerRepository,
+	uow dataaccess.UnitOfWork,
 	mux *http.ServeMux) {
 
-	routing.BindRoute(mux, "/api/servers", handlers.HandleServers(dbr, sr))
-	routing.BindRoute(mux, "/api/server/{id}", handlers.HandleServerDetails(sr))
-	routing.BindRoute(mux, "/api/server", handlers.HandleServerNew(sr))
-	routing.BindRoute(mux, "/api/databases", handlers.HandleDatabases(dbr, sr))
-	routing.BindRoute(mux, "/api/database/{id}", handlers.HandleDatabaseDetails(dbr))
-	routing.BindRoute(mux, "/api/database", handlers.HandleDatabaseNew(dbr, sr))
+	routing.BindRoute(mux, "/api/servers", handlers.HandleServers(uow))
+	routing.BindRoute(mux, "/api/server/{id}", handlers.HandleServerDetails(uow))
+	routing.BindRoute(mux, "/api/server", handlers.HandleServerNew(uow))
+	routing.BindRoute(mux, "/api/databases", handlers.HandleDatabases(uow))
+	routing.BindRoute(mux, "/api/database/{id}", handlers.HandleDatabaseDetails(uow))
+	routing.BindRoute(mux, "/api/database", handlers.HandleDatabaseNew(uow))
 }
 
 func emptyHandler() http.HandlerFunc {

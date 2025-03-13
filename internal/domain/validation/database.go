@@ -11,7 +11,7 @@ import (
 	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
-func ValidateDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.ServerRepository, database entities.Database) (bool, map[string]string) {
+func ValidateDatabaseNew(uow dataaccess.UnitOfWork, database entities.Database) (bool, map[string]string) {
 	var errors = make(map[string]string)
 	var namePattern = regexp.MustCompile(`\w`)
 
@@ -27,13 +27,13 @@ func ValidateDatabaseNew(dbr dataaccess.DatabaseRepository, sr dataaccess.Server
 	if strings.TrimSpace(database.Server) == "" {
 		errors["Server"] = "Please specify a server name"
 	} else {
-		server, err := sr.GetServerByName(database.Server)
+		server, err := uow.Servers.GetServerByName(database.Server)
 		if err != nil {
 			slog.Error("Error fetching server", utils.ErrAttr(err))
 		}
 
 		if server != nil {
-			existing, _ := dbr.GetDatabaseByName(database.Name)
+			existing, _ := uow.DBs.GetDatabaseByName(database.Name)
 			// TODO: Figure out the pattern here.
 			//       err would be !nil but that's right when existing is nil
 			//       but what if there's a real error, not just "database not found"?

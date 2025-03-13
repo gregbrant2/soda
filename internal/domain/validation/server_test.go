@@ -8,10 +8,10 @@ import (
 )
 
 func TestValidateServerNewSuccess(t *testing.T) {
+	uow, _, _ := fakeDataAccess()
 	server := ValidServer()
-	r := &FakeServerRepository{}
 
-	success, errors := ValidateServerNew(r, *server)
+	success, errors := ValidateServerNew(uow, *server)
 
 	assert.True(t, success)
 	assert.Len(t, errors, 0)
@@ -19,9 +19,9 @@ func TestValidateServerNewSuccess(t *testing.T) {
 
 func TestValidateServerNewEmptyErrors(t *testing.T) {
 	server := entities.Server{}
-	r := &FakeServerRepository{}
+	uow, _, _ := fakeDataAccess()
 
-	success, errors := ValidateServerNew(r, server)
+	success, errors := ValidateServerNew(uow, server)
 
 	assert.False(t, success)
 	assert.Len(t, errors, 6)
@@ -29,13 +29,13 @@ func TestValidateServerNewEmptyErrors(t *testing.T) {
 
 func TestValidateServerNewExistingNameErrors(t *testing.T) {
 	server := ValidServer()
-	r := &FakeServerRepository{
-		getServerByNameResult: &entities.Server{
-			Name: server.Name,
-		},
+	uow, _, sr := fakeDataAccess()
+
+	sr.getServerByNameResult = &entities.Server{
+		Name: server.Name,
 	}
 
-	success, errors := ValidateServerNew(r, *server)
+	success, errors := ValidateServerNew(uow, *server)
 
 	assert.False(t, success)
 	assert.Len(t, errors, 1)
