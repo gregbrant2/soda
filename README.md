@@ -29,6 +29,13 @@ to get a good general knowledge of Go fundamentals.
 ## Development
 Below are some of the things I might get round to, in rough, but not definate order.
 
+To run the project locally for development do
+
+```
+$ make start-soda-db
+$ make soda-dev
+```
+
 ### To Do
 - [x] Create database on target server
 - [x] Form validation
