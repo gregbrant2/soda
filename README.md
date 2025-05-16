@@ -43,7 +43,7 @@ Below are some of the things I might get round to, in rough, but not definate or
   - [x] Docker container
   - [ ] Application binary
 - [x] Upgrade logging
-- [ ] Sanitize queries
+- [x] Sanitize queries
 - [ ] Transactions around create database operations
 - [ ] User documentation
 - [x] Error handling (better than `log.Fatal`)
