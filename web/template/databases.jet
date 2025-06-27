@@ -1,0 +1,43 @@
+{{ extends "soda.jet" }}
+
+{{block head()}}
+    <title>Databases - Soda</title>
+{{end}}
+
+{{block subheader()}}
+{{end}}
+
+{{block body()}}
+<article class="layout--flow">
+<h3>Databases</h3>
+    <div class="layout--flow">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Server</th>
+                    <th>Status?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range . }}
+                    <tr>
+                        <td><a href="/databases/{{ .Id }}">{{ .Name }}</a></td>
+                        <td>{{ .Server }}</td>
+                        <td>{{ . }}</td>
+                    </tr>
+                {{ end }}
+                </tbody>
+                <tfoot>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <a href="/database/new" class="button">New database</a>
+    </footer>
+</article>
+
+{{end}}

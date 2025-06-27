@@ -14,10 +14,12 @@ func RegisterRoutes(uow dataaccess.UnitOfWork, e *echo.Echo, group *echo.Group) 
 
 	group.GET("/", handlers.HandleDashboard(uow))
 
+	group.GET("/databases", handlers.HandleDatabaseList(uow))
 	group.GET("/database/new", handlers.HandleDatabaseNew(uow))
 	group.POST("/database/new", handlers.HandleDatabaseNew(uow))
 	group.GET("/databases/:id", handlers.HandleDatabaseDetails(uow))
 
+	group.GET("/servers", handlers.HandleServerList(uow))
 	group.GET("/servers/new", handlers.HandleServerNew(uow))
 	group.POST("/servers/new", handlers.HandleServerNew(uow))
 	group.GET("/servers/:id", handlers.HandleServerDetails(uow))

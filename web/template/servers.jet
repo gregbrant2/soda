@@ -1,0 +1,46 @@
+{{ extends "soda.jet" }}
+
+{{block head()}}
+    <title>Servers - Soda</title>
+{{end}}
+
+{{block subheader()}}
+{{end}}
+
+{{block body()}}
+<article class="layout--flow">
+<h3>Servers</h3>
+    <div class="layout--flow">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>IP Address</th>
+                    <th>Port</th>
+                    <th>Status?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range . }}
+                    <tr>
+                        <td><a href="/servers/{{ .Id }}">{{ .Name }}</a></td>
+                        <td>{{ .Type }}</td>
+                        <td>{{ .IpAddress }}</td>
+                        <td>{{ .Port }}</td>
+                        <td>{{ . }}</td>
+                    </tr>
+                {{ end }}
+                </tbody>
+                <tfoot>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <a href="/servers/new" class="button">Add server</a>
+    </footer>
+</article>
+{{end}}

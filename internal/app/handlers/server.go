@@ -13,6 +13,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func HandleServerList(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		slog.Debug("Getting servers")
+
+		servers, err := uow.Servers.GetServers()
+		if err != nil {
+			utils.Fatal("Error getting servers", err)
+		}
+
+		return renderTemplate(c, "servers", servers)
+	}
+}
+
 func HandleServerDetails(uow dataaccess.UnitOfWork) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		slog.Debug("Getting server details")

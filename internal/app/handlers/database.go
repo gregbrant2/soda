@@ -17,6 +17,19 @@ import (
 	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
+func HandleDatabaseList(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		slog.Debug("Getting databases")
+
+		dbs, err := uow.DBs.GetDatabases()
+		if err != nil {
+			utils.Fatal("Error getting dbs", err)
+		}
+
+		return renderTemplate(c, "databases", dbs)
+	}
+}
+
 func HandleDatabaseDetails(uow dataaccess.UnitOfWork) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		slog.Debug("Getting database details")
