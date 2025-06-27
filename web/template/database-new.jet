@@ -1,13 +1,15 @@
-{{define "head"}}
+{{ extends "soda.jet" }}
+
+{{block head()}}
     <title>New database - Soda</title>
 {{end}}
 
-{{define "subheader"}}
+{{block subheader()}}
 <h2>New<span> / database</span></h2>
 {{end}}
 
 
-{{define "body"}}
+{{block body()}}
 
 <div>
     <p>Something about creating your new database.</p>

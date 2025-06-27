@@ -1,12 +1,14 @@
-{{define "head"}}
+{{ extends "soda.jet" }}
+
+{{block head()}}
     <title>Dashboard - Soda</title>
 {{end}}
 
-{{define "subheader"}}
+{{block subheader()}}
 <h2>Databases</h2>
 {{end}}
 
-{{define "body"}}
+{{block body()}}
 <article class="layout--flow">
 <h3>Databases</h3>
     <div class="layout--flow">

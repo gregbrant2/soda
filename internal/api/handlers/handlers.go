@@ -10,33 +10,33 @@ import (
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
 	"github.com/gregbrant2/soda/internal/domain/validation"
 	"github.com/gregbrant2/soda/internal/plumbing/utils"
+	"github.com/labstack/echo/v4"
 	"golang.org/x/exp/slog"
 )
 
-func HandleServers(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleServers(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		servers, err := uow.Servers.GetServers()
 		if err != nil {
 			slog.Error("Error getting servers", utils.ErrAttr(err))
-			handleError(w, http.StatusInternalServerError, err.Error(), nil)
+			return handleError(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		if servers == nil {
-			notFound(w)
+			return notFound(c)
 		}
 
-		returnJson(w, mapping.MapServers(servers))
+		return returnJson(c, mapping.MapServers(servers))
 	}
 }
 
-func HandleServerDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleServerDetails(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		slog.Debug("Getting server details")
-		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+		id, err := strconv.ParseInt(c.Param("id"), 10, 32)
 		if err != nil {
 			slog.Error("Error getting Id", "id", id, utils.ErrAttr(err))
-			handleError(w, http.StatusBadRequest, err.Error(), nil)
-			return
+			return handleError(c, http.StatusBadRequest, err.Error(), nil)
 		}
 
 		slog.Info("Getting server details for", "id", id)
@@ -44,142 +44,128 @@ func HandleServerDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
 		server, err := uow.Servers.GetServerById(id)
 		if err != nil {
 			slog.Error("Error getting server from repository", "id", id, err)
-			handleError(w, http.StatusInternalServerError, err.Error(), nil)
-			return
+			return handleError(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		if server == nil {
-			notFound(w)
-			return
+			return notFound(c)
 		}
 
-		returnJson(w, mapping.MapServer(*server))
+		return returnJson(c, mapping.MapServer(*server))
 	}
 }
 
-func HandleServerNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleServerNew(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		slog.Debug("Attempting to create new server")
 		var payload dtos.NewServer
-		err := json.NewDecoder(r.Body).Decode(&payload)
+		err := json.NewDecoder(c.Request().Body).Decode(&payload)
 
 		if err != nil {
 			slog.Error("Error decoding JSON request", utils.ErrAttr(err))
-			handleError(w, http.StatusBadRequest, err.Error(), nil)
-			return
+			return handleError(c, http.StatusBadRequest, err.Error(), nil)
 		}
 
 		server := mapping.MapNewServer(payload)
 		valid, errors := validation.ValidateServerNew(uow, server)
 		if !valid {
 			slog.Debug("Validation errors were encountered", "errors", errors)
-			handleError(w, http.StatusBadRequest, "Invalid payload", errors)
-			return
+			return handleError(c, http.StatusBadRequest, "Invalid payload", errors)
 		}
 
 		serverId, err := uow.Servers.AddServer(server)
 		if err != nil {
-			handleError(w, http.StatusInternalServerError, err.Error(), nil)
-			return
+			return handleError(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		result := mapping.MapServer(server)
 		result.Id = serverId
 
-		returnJson(w, result)
+		return returnJson(c, result)
 	}
 }
 
-func HandleDatabases(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleDatabases(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		slog.Debug("Getting databases")
 		databases, err := uow.DBs.GetDatabases()
 		if err != nil {
 			slog.Error("Error getting databases", utils.ErrAttr(err))
-			handleError(w, http.StatusInternalServerError, err.Error(), nil)
+			return handleError(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		if databases == nil {
 			slog.Debug("Datanases was nil")
-			notFound(w)
+			return notFound(c)
 		}
 
-		returnJson(w, mapping.MapDatabases(databases))
+		return returnJson(c, mapping.MapDatabases(databases))
 	}
 }
 
-func HandleDatabaseDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleDatabaseDetails(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		slog.Debug("Getting database details")
-		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+		id, err := strconv.ParseInt(c.Param("id"), 10, 32)
 		slog.Info("Attempting to get database", "id", id)
 		if err != nil {
 			slog.Error("Error getting database", utils.ErrAttr(err))
-			handleError(w, http.StatusBadRequest, err.Error(), nil)
-			return
+			return handleError(c, http.StatusBadRequest, err.Error(), nil)
 		}
 
 		database, err := uow.DBs.GetDatabaseById(id)
 		if err != nil {
 			slog.Error("Error getting database", "id", id, utils.ErrAttr(err))
-			handleError(w, http.StatusInternalServerError, err.Error(), nil)
-			return
+			return handleError(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		if database == nil {
-			notFound(w)
-			return
+			return notFound(c)
 		}
 
-		returnJson(w, mapping.MapDatabase(*database))
+		return returnJson(c, mapping.MapDatabase(*database))
 	}
 }
 
-func HandleDatabaseNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleDatabaseNew(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		slog.Debug("Attempting to create new database")
 		var payload dtos.NewDatabase
-		err := json.NewDecoder(r.Body).Decode(&payload)
+		err := json.NewDecoder(c.Request().Body).Decode(&payload)
 
 		if err != nil {
 			slog.Error("Error decoding JSON request", utils.ErrAttr(err))
-			handleError(w, http.StatusBadRequest, err.Error(), nil)
-			return
+			return handleError(c, http.StatusBadRequest, err.Error(), nil)
 		}
 
 		database := mapping.MapNewDatabase(payload)
 		valid, errors := validation.ValidateDatabaseNew(uow, database)
 		if !valid {
 			slog.Debug("Validation errors were encountered", "errors", errors)
-			handleError(w, http.StatusBadRequest, "Invalid payload", errors)
-			return
+			return handleError(c, http.StatusBadRequest, "Invalid payload", errors)
 		}
 
 		dbId, err := uow.DBs.AddDatabase(database)
 		if err != nil {
-			handleError(w, http.StatusInternalServerError, err.Error(), nil)
-			return
+			return handleError(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		result := mapping.MapDatabase(database)
 		result.Id = dbId
 
-		returnJson(w, result)
+		return returnJson(c, result)
 	}
 }
 
-func notFound(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotFound)
+func notFound(c echo.Context) *echo.HTTPError {
+	return echo.NewHTTPError(http.StatusNotFound, "Not Found")
 }
 
-func returnJson(w http.ResponseWriter, payload interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(payload)
+func returnJson(c echo.Context, payload interface{}) error {
+	return c.JSON(http.StatusOK, payload)
 }
 
-func handleError(w http.ResponseWriter, status int, message string, fields map[string]string) {
+func handleError(c echo.Context, status int, message string, fields map[string]string) error {
 	err := dtos.ApiError{Message: message, Fields: fields}
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(err)
+	return c.JSON(status, err)
 }

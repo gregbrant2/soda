@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
-	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/gregbrant2/soda/internal/api"
 	"github.com/gregbrant2/soda/internal/app"
@@ -11,6 +13,30 @@ import (
 )
 
 func main() {
+	banner()
+
+	utils.InitLogging()
+	uow, close := dataaccess.NewUow()
+	defer close()
+
+	e := echo.New()
+
+	e.Debug = true
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	uiGroup := e.Group("")
+	app.RegisterRoutes(uow, e, uiGroup)
+
+	apiGroup := e.Group("/api")
+	// apiGroup.Use(middleware.JWTWithConfig())
+	api.RegisterRoutes(uow, apiGroup)
+
+	e.Logger.Fatal(e.Start(":3030"))
+}
+
+func banner() {
 	log.Println(`
    _____           _       
   / ____|         | |      
@@ -19,17 +45,4 @@ func main() {
   ____) | (_) | (_| | (_| |
  |_____/ \___/ \__,_|\__,_|                           
                            `)
-
-	utils.InitLogging()
-	uow, close := dataaccess.NewUow()
-	defer close()
-
-	mux := http.NewServeMux()
-	app.RegisterRoutes(uow, mux)
-	api.RegisterRoutes(uow, mux)
-
-	err := http.ListenAndServe(":3030", mux)
-	if err != nil {
-		log.Fatal(err)
-	}
 }

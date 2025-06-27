@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/elliotchance/pie/v2"
+	"github.com/labstack/echo/v4"
 
 	"github.com/gregbrant2/soda/internal/app/viewmodels"
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
@@ -16,14 +17,13 @@ import (
 	"github.com/gregbrant2/soda/internal/plumbing/utils"
 )
 
-func HandleDatabaseDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleDatabaseDetails(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		slog.Debug("Getting database details")
-		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+		id, err := strconv.ParseInt(c.Param("id"), 10, 32)
 		if err != nil {
 			slog.Error("Error parsing Id from query", utils.ErrAttr(err))
-			errorHandler(w, r, http.StatusBadRequest)
-			return
+			return errorHandler(c, http.StatusBadRequest)
 		}
 
 		slog.Info("Database details", "id", id)
@@ -37,15 +37,15 @@ func HandleDatabaseDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
 			utils.Fatal("Error getting server for db", err, "db", db)
 		}
 
-		renderTemplate(w, "database-details", viewmodels.DatabaseDetails{
+		return renderTemplate(c, "database-details", viewmodels.DatabaseDetails{
 			Database: *db,
 			Server:   *server,
 		})
 	}
 }
 
-func HandleDatabaseNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleDatabaseNew(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		slog.Debug("New database")
 		servers, err := uow.Servers.GetServers()
 		if err != nil {
@@ -54,7 +54,7 @@ func HandleDatabaseNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 
 		var selectedServer entities.Server
 		var selectedServerId int64 = -1
-		selectedServerQuery := r.URL.Query().Get("serverId")
+		selectedServerQuery := c.QueryParam("serverId")
 		if len(selectedServerQuery) > 0 {
 			selectedServerId, err = strconv.ParseInt(selectedServerQuery, 10, 64)
 			if err != nil {
@@ -71,10 +71,10 @@ func HandleDatabaseNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 			Errors: nil,
 		}
 
-		if r.Method == http.MethodPost {
+		if c.Request().Method == http.MethodPost {
 			database := entities.Database{
-				Name:   r.PostFormValue("name"),
-				Server: r.PostFormValue("server"),
+				Name:   c.FormValue("name"),
+				Server: c.FormValue("server"),
 			}
 
 			slog.Debug("Adding database")
@@ -83,8 +83,7 @@ func HandleDatabaseNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 				vm.Errors = errors
 				vm.Database = database
 				slog.Debug("Returning validation errors", "errors", errors)
-				handleDatabaseNewView(w, r, servers, vm)
-				return
+				return handleDatabaseNewView(c, servers, vm)
 			}
 
 			server, err := uow.Servers.GetServerByName(database.Server)
@@ -97,30 +96,30 @@ func HandleDatabaseNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 				utils.Fatal("Error adding database", err)
 			}
 
-			c, err := clients.CreateServer(*server)
+			s, err := clients.CreateServer(*server)
 			if err != nil {
 				utils.Fatal("", err)
 			}
 
-			err = c.CreateDatabase(*server, database.Name)
+			err = s.CreateDatabase(*server, database.Name)
 			if err != nil {
 				utils.Fatal("Error creating database on target server", err)
 			}
 
 			// TODO: Implement password
-			err = c.CreateUser(*server, database.Name, database.Name, database.Name)
+			err = s.CreateUser(*server, database.Name, database.Name, database.Name)
 			if err != nil {
 				utils.Fatal("Error creating user on target server", err)
 			}
 
-			http.Redirect(w, r, fmt.Sprintf("/databases/%d", id), http.StatusSeeOther)
+			c.Redirect(http.StatusSeeOther, fmt.Sprintf("/databases/%d", id))
 		}
 
-		handleDatabaseNewView(w, r, servers, vm)
+		return handleDatabaseNewView(c, servers, vm)
 	}
 }
 
-func handleDatabaseNewView(w http.ResponseWriter, r *http.Request, servers []entities.Server, vm viewmodels.NewDatabase) {
+func handleDatabaseNewView(c echo.Context, servers []entities.Server, vm viewmodels.NewDatabase) error {
 	serverNames := pie.Map(
 		servers,
 		func(e entities.Server) string {
@@ -129,5 +128,5 @@ func handleDatabaseNewView(w http.ResponseWriter, r *http.Request, servers []ent
 	)
 
 	vm.ServerNames = serverNames
-	renderTemplate(w, "database-new", vm)
+	return renderTemplate(c, "database-new", vm)
 }

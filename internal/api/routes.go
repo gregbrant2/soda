@@ -5,19 +5,19 @@ import (
 
 	"github.com/gregbrant2/soda/internal/api/handlers"
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
-	"github.com/gregbrant2/soda/internal/plumbing/routing"
+	"github.com/labstack/echo/v4"
 )
 
 func RegisterRoutes(
 	uow dataaccess.UnitOfWork,
-	mux *http.ServeMux) {
+	group *echo.Group) {
 
-	routing.BindRoute(mux, "/api/servers", handlers.HandleServers(uow))
-	routing.BindRoute(mux, "/api/server/{id}", handlers.HandleServerDetails(uow))
-	routing.BindRoute(mux, "/api/server", handlers.HandleServerNew(uow))
-	routing.BindRoute(mux, "/api/databases", handlers.HandleDatabases(uow))
-	routing.BindRoute(mux, "/api/database/{id}", handlers.HandleDatabaseDetails(uow))
-	routing.BindRoute(mux, "/api/database", handlers.HandleDatabaseNew(uow))
+	group.GET("/api/servers", handlers.HandleServers(uow))
+	group.GET("/api/server/:id", handlers.HandleServerDetails(uow))
+	group.POST("/api/server", handlers.HandleServerNew(uow))
+	group.GET("/api/databases", handlers.HandleDatabases(uow))
+	group.POST("/api/database/:id", handlers.HandleDatabaseDetails(uow))
+	group.GET("/api/database", handlers.HandleDatabaseNew(uow))
 }
 
 func emptyHandler() http.HandlerFunc {

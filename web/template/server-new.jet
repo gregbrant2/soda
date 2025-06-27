@@ -1,12 +1,14 @@
-{{define "head"}}
+{{ extends "soda.jet" }}
+
+{{block head()}}
     <title>New server - Soda</title>
 {{end}}
 
-{{define "subheader"}}
+{{block subheader()}}
 <h2>New<span> / server</span></h2>
 {{end}}
 
-{{define "body"}}
+{{block body()}}
 
 <div>
     <p>Enter the server connection details below. 

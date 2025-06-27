@@ -12,7 +12,7 @@
     
         <meta name="theme-color" content="#DE3163">
 
-        {{block "head" .}}{{end}}
+        {{block head()}}{{end}}
 
         <script src="/static/htmx.min.js"></script>
     </head>
@@ -36,7 +36,7 @@
 
               <section class="page__subheader">
                 <div>
-                    {{block "subheader" .}}{{end}}
+                    {{block subheader()}}{{end}}
                 </div>
               </section>
 
@@ -44,7 +44,7 @@
                 <section id="text" class="container layout--flow-double">
                     <article class="layout--flow">
                         <!-- begin template body -->
-                        {{block "body" .}}{{end}}
+                        {{block body()}}{{end}}
                         <!-- end template body -->
                     </article>
                 </section>

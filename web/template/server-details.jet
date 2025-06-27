@@ -1,9 +1,11 @@
-{{define "head"}}
+{{ extends "soda.jet" }}
+
+{{block head()}}
     <title>{{ .Name }} - server details - Soda</title>
 {{end}}
 
 
-{{define "body"}}
+{{block body()}}
 <article class="layout--flow">
     <header>
         <h2>Server details</h2>

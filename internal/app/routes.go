@@ -1,23 +1,24 @@
 package app
 
 import (
-	"net/http"
-
 	"github.com/gregbrant2/soda/internal/app/handlers"
 	"github.com/gregbrant2/soda/internal/domain/dataaccess"
-	"github.com/gregbrant2/soda/internal/plumbing/routing"
+	"github.com/labstack/echo/v4"
 )
 
-func RegisterRoutes(
-	uow dataaccess.UnitOfWork,
-	mux *http.ServeMux) {
+func RegisterRoutes(uow dataaccess.UnitOfWork, e *echo.Echo, group *echo.Group) {
 
-	fs := http.FileServer(http.Dir("./web/static/"))
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	InitRendering(e)
 
-	routing.BindRoute(mux, "/", handlers.HandleDashboard(uow))
-	routing.BindRoute(mux, "/database/new", handlers.HandleDatabaseNew(uow))
-	routing.BindRoute(mux, "/databases/{id}", handlers.HandleDatabaseDetails(uow))
-	routing.BindRoute(mux, "/servers/new", handlers.HandleServerNew(uow))
-	routing.BindRoute(mux, "/servers/{id}", handlers.HandleServerDetails(uow))
+	group.Static("/static", "web/static")
+
+	group.GET("/", handlers.HandleDashboard(uow))
+
+	group.GET("/database/new", handlers.HandleDatabaseNew(uow))
+	group.POST("/database/new", handlers.HandleDatabaseNew(uow))
+	group.GET("/databases/:id", handlers.HandleDatabaseDetails(uow))
+
+	group.GET("/servers/new", handlers.HandleServerNew(uow))
+	group.POST("/servers/new", handlers.HandleServerNew(uow))
+	group.GET("/servers/:id", handlers.HandleServerDetails(uow))
 }

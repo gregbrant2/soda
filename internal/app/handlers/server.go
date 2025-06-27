@@ -10,16 +10,16 @@ import (
 	"github.com/gregbrant2/soda/internal/domain/entities"
 	"github.com/gregbrant2/soda/internal/domain/validation"
 	"github.com/gregbrant2/soda/internal/plumbing/utils"
+	"github.com/labstack/echo/v4"
 )
 
-func HandleServerDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleServerDetails(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		slog.Debug("Getting server details")
-		id, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+		id, err := strconv.ParseInt(c.Param("id"), 10, 32)
 		if err != nil {
 			slog.Error("Error getting Id from query", utils.ErrAttr(err))
-			errorHandler(w, r, http.StatusBadRequest)
-			return
+			return errorHandler(c, http.StatusBadRequest)
 		}
 
 		slog.Info("Server details for", "id", id)
@@ -28,7 +28,7 @@ func HandleServerDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
 			utils.Fatal("Error getting server", err, "id", id)
 		}
 
-		renderTemplate(w, "server-details", entities.Server{
+		return renderTemplate(c, "server-details", entities.Server{
 			Id:        server.Id,
 			Name:      server.Name,
 			IpAddress: server.IpAddress,
@@ -42,21 +42,21 @@ func HandleServerDetails(uow dataaccess.UnitOfWork) http.HandlerFunc {
 	}
 }
 
-func HandleServerNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleServerNew(uow dataaccess.UnitOfWork) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		slog.Debug("Creating new server")
 
 		vm := viewmodels.NewServer{}
 
-		if r.Method == http.MethodPost {
+		if c.Request().Method == http.MethodPost {
 			slog.Info("Adding server")
 			server := entities.Server{
-				Name:      r.PostFormValue("name"),
-				IpAddress: r.PostFormValue("ipAddress"),
-				Port:      r.PostFormValue("port"),
-				Type:      r.PostFormValue("type"),
-				Username:  r.PostFormValue("username"),
-				Password:  r.PostFormValue("password"),
+				Name:      c.FormValue("name"),
+				IpAddress: c.FormValue("ipAddress"),
+				Port:      c.FormValue("port"),
+				Type:      c.FormValue("type"),
+				Username:  c.FormValue("username"),
+				Password:  c.FormValue("password"),
 			}
 
 			slog.Debug("Saving", "server", server.Name)
@@ -64,8 +64,7 @@ func HandleServerNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 			if !valid {
 				vm.Errors = errors
 				vm.Server = &server
-				handleServerNewView(w, vm)
-				return
+				return handleServerNewView(c, vm)
 			}
 
 			id, err := uow.Servers.AddServer(server)
@@ -74,14 +73,14 @@ func HandleServerNew(uow dataaccess.UnitOfWork) http.HandlerFunc {
 			}
 
 			slog.Debug("Done adding server")
-			http.Redirect(w, r, "/servers/"+strconv.FormatInt(int64(id), 10), http.StatusSeeOther)
+			c.Redirect(http.StatusSeeOther, "/servers/"+strconv.FormatInt(int64(id), 10))
 		}
 
-		handleServerNewView(w, vm)
+		return handleServerNewView(c, vm)
 	}
 }
 
-func handleServerNewView(w http.ResponseWriter, vm viewmodels.NewServer) {
+func handleServerNewView(c echo.Context, vm viewmodels.NewServer) error {
 	if vm.Server == nil {
 		vm.Server = &entities.Server{
 			Name:      "",
@@ -93,5 +92,5 @@ func handleServerNewView(w http.ResponseWriter, vm viewmodels.NewServer) {
 		}
 	}
 
-	renderTemplate(w, "server-new", vm)
+	return renderTemplate(c, "server-new", vm)
 }
